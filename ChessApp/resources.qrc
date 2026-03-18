@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/assets">
+        <file alias="WhitePawn.png">assets/pieces/WhitePawn.png</file>
+        <file alias="WhiteKnight.png">assets/pieces/WhiteKnight.png</file>
+        <file alias="WhiteBishop.png">assets/pieces/WhiteBishop.png</file>
+        <file alias="WhiteRook.png">assets/pieces/WhiteRook.png</file>
+        <file alias="WhiteQueen.png">assets/pieces/WhiteQueen.png</file>
+        <file alias="WhiteKing.png">assets/pieces/WhiteKing.png</file>
+        <file alias="BlackPawn.png">assets/pieces/BlackPawn.png</file>
+        <file alias="BlackKnight.png">assets/pieces/BlackKnight.png</file>
+        <file alias="BlackBishop.png">assets/pieces/BlackBishop.png</file>
+        <file alias="BlackRook.png">assets/pieces/BlackRook.png</file>
+        <file alias="BlackQueen.png">assets/pieces/BlackQueen.png</file>
+        <file alias="BlackKing.png">assets/pieces/BlackKing.png</file>
+    </qresource>
+</RCC>

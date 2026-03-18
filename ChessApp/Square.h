@@ -12,4 +12,6 @@ class Square : public QGraphicsRectItem {
 
 public:
 	Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos, QGraphicsItem* parent = nullptr);
+	qreal getX();
+	qreal getY();
 };

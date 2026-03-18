@@ -8,7 +8,16 @@ Square::Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos, Q
 
 	QColor darkSquare(194, 106, 62);
 	QColor lightSquare(247, 183, 151);
-	setRect(xPos, yPos, 100, 100);
+	setRect(0, 0, 90, 90);
 	setBrush(QBrush(color == SquareColor::dark ? darkSquare : lightSquare));
 	setPen(Qt::NoPen);
+	setPos(xPos, yPos);
+}
+
+qreal Square::getX() {
+	return pos().x();
+}
+
+qreal Square::getY() {
+	return pos().y();
 }
