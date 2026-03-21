@@ -63,6 +63,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -92,7 +98,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bishop.cpp" />
+    <ClCompile Include="King.cpp" />
+    <ClCompile Include="Knight.cpp" />
+    <ClCompile Include="Pawn.cpp" />
     <ClCompile Include="Piece.cpp" />
+    <ClCompile Include="Queen.cpp" />
+    <ClCompile Include="Rook.cpp" />
     <ClCompile Include="Square.cpp" />
     <QtRcc Include="MainWindow.qrc" />
     <QtRcc Include="resources.qrc" />
@@ -103,11 +115,19 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bishop.h" />
     <ClInclude Include="ChessBoard.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="King.h" />
+    <ClInclude Include="Knight.h" />
+    <ClInclude Include="Pawn.h" />
     <ClInclude Include="Piece.h" />
+    <ClInclude Include="PieceFactory.h" />
+    <ClInclude Include="Queen.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Rook.h" />
     <ClInclude Include="Square.h" />
+    <ClInclude Include="pieceTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChessApp.rc" />

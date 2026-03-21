@@ -1,6 +1,6 @@
 #include "ChessBoard.h"
-#include "Square.h"
-#include "Piece.h"
+#include "pieceTypes.h"
+#include "PieceFactory.h"
 #include "enums.h"
 #include<QGraphicsRectItem>
 #include<vector>
@@ -11,6 +11,8 @@ ChessBoard::ChessBoard(QGraphicsScene* scene)
 
 QGraphicsScene* ChessBoard::getScene() { return scene; }
 
+vector<Square*> ChessBoard::getAllSquares() { return allSquares; }
+
 void ChessBoard::drawBoard() {
 	SquareColor color = SquareColor::dark;
 	int xPos = 0;
@@ -18,7 +20,7 @@ void ChessBoard::drawBoard() {
 
 	for (int rank = 1; rank <= 8; rank++) {
 		for (int file = 0; file < 8; file++) {
-			Square* square = new Square(static_cast<File>(file), rank, color, xPos, yPos);
+			Square* square = new Square(static_cast<File>(file), rank, color, xPos, yPos, this);
 			scene->addItem(square);
 			allSquares[(rank - 1) * 8 + file] = square;
 
@@ -32,39 +34,57 @@ void ChessBoard::drawBoard() {
 	}
 }
 
-void ChessBoard::drawPiece(QString path, qreal x, qreal y) {
-	QPixmap pix(path);
-	QGraphicsPixmapItem* piecePicture = new QGraphicsPixmapItem(pix);
-	piecePicture->setPos(x, y);
-	piecePicture->setZValue(1);
-	piecePicture->setScale(90.0 / pix.width());
-	scene->addItem(piecePicture);
+void ChessBoard::drawPiece(Piece* piece) {
+	QPixmap pix(piece->getPath());
+	Square* square = piece->getSquare();
+
+	piece->setPixmap(pix);
+	piece->setZValue(1);
+	piece->setScale(80.0 / pix.width());
+	piece->setPos(square->getX() + 5, square->getY() + 7);
+
+	scene->addItem(piece);
 }
 
 void ChessBoard::setStartingPosition() {
 	vector<PieceType> startingSetup = { PieceType::Rook, PieceType::Knight, PieceType::Bishop,
 		PieceType::Queen, PieceType::King, PieceType::Bishop, PieceType::Knight, PieceType::Rook };
 	int file;
+
 	for (int rank = 1; rank <= 8; rank++) {
 		file = 0;
 		if (rank == 1 || rank == 8) {
 			for (PieceType type : startingSetup) {
 				PieceColor color = colorsByRank.at(rank);
-				Piece* piece = new Piece(type, color, allSquares[(rank - 1) * 8 + file]);
-				Square* square = piece->getSquare();
-				drawPiece(":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png",
-					square->getX(), square->getY());
+				QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
+				Square* square = allSquares[(rank - 1) * 8 + file];
+				Piece* piece = createPiece(type, color, square, path, this);
+				drawPiece(piece);
+				square->setPiece(piece);
 				file++;
 			}
 		}
 		if (rank == 2 || rank == 7) {
+			PieceColor color = colorsByRank.at(rank);
+			QString path = ":/assets/" + colorStrings.at(color) + "Pawn.png";
+
 			for (file = 0; file < 8; file++) {
-				PieceColor color = colorsByRank.at(rank);
-				Piece* piece = new Piece(PieceType::Pawn, color, allSquares[(rank - 1) * 8 + file]);
-				Square* square = piece->getSquare();
-				drawPiece(":/assets/" + colorStrings.at(color) + "Pawn.png",
-					square->getX(), square->getY());
+				Square* square = allSquares[(rank - 1) * 8 + file];
+				Piece* piece = new Pawn(color, square, path, this);
+				drawPiece(piece);
+				square->setPiece(piece);
 			}
 		}
+	}
+}
+
+void ChessBoard::selectSquare(Square* square) {
+	if (selectedSquare != nullptr) {
+		selectedSquare->resetColor();
+	}
+	if (square->getPiece() != nullptr) {
+		selectedSquare = square;
+		square->getPiece()->showLegalMoves();
+		selectedSquare->highlight();
 	}
 }
