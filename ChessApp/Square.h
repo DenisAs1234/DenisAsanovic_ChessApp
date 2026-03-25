@@ -26,5 +26,7 @@ public:
 	Piece* getPiece();
 	void setPiece(Piece* piece);
 	void resetColor();
-	void highlight();
+	void highlightSelected();
+	void highlightMove();
+	bool isOccupied();
 };

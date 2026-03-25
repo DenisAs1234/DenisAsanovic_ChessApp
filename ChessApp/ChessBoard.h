@@ -17,4 +17,7 @@ public:
 	void selectSquare(Square* square);
 	QGraphicsScene* getScene();
 	vector<Square*> getAllSquares();
+	Square* getSelectedSquare();
+	void resetSelectedSquare();
+	void resetColorOfLegalMoves(vector<Square*> legalMoves);
 };

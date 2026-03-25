@@ -27,7 +27,26 @@ qreal Square::getX() { return pos().x(); }
 qreal Square::getY() { return pos().y(); }
 
 void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-	board->selectSquare(this);
+	Square* selectedSquare = board->getSelectedSquare();
+
+	if (!selectedSquare) {
+		board->selectSquare(this);
+		return;
+	}
+
+	Piece* piece = selectedSquare->getPiece();
+	vector<Square*> legalMoves = piece->getLegalMoves();
+	bool isLegalMove = find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end();
+
+	if (isLegalMove) {
+		piece->moveTo(this);
+		board->resetSelectedSquare();
+		board->resetColorOfLegalMoves(legalMoves);
+	}
+	else {
+		board->selectSquare(this);
+	}
+
 	QGraphicsRectItem::mousePressEvent(event);
 }
 
@@ -45,6 +64,14 @@ void Square::resetColor() {
 	setBrush(QBrush(color == SquareColor::dark ? darkSquare : lightSquare));
 }
 
-void Square::highlight() {
+void Square::highlightSelected() {
 	setBrush(QBrush(color == SquareColor::dark ? QColor(252, 186, 3) : QColor(250, 209, 5)));
+}
+
+void Square::highlightMove() {
+	setBrush(QBrush(color == SquareColor::dark ? QColor(30, 156, 52) : QColor(52, 235, 85)));
+}
+
+bool Square::isOccupied() {
+	return this->getPiece() != nullptr;
 }

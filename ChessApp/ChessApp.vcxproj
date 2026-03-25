@@ -128,6 +128,7 @@
     <ClInclude Include="Rook.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="pieceTypes.h" />
+    <ClInclude Include="SquareIndex.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChessApp.rc" />

@@ -117,6 +117,9 @@
     <ClInclude Include="PieceFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SquareIndex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChessApp.rc">

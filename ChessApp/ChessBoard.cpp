@@ -4,7 +4,6 @@
 #include "enums.h"
 #include<QGraphicsRectItem>
 #include<vector>
-using namespace std;
 
 ChessBoard::ChessBoard(QGraphicsScene* scene)
 	: scene(scene), allSquares(64) {}
@@ -12,6 +11,8 @@ ChessBoard::ChessBoard(QGraphicsScene* scene)
 QGraphicsScene* ChessBoard::getScene() { return scene; }
 
 vector<Square*> ChessBoard::getAllSquares() { return allSquares; }
+
+Square* ChessBoard::getSelectedSquare() { return selectedSquare; }
 
 void ChessBoard::drawBoard() {
 	SquareColor color = SquareColor::dark;
@@ -80,11 +81,29 @@ void ChessBoard::setStartingPosition() {
 
 void ChessBoard::selectSquare(Square* square) {
 	if (selectedSquare != nullptr) {
-		selectedSquare->resetColor();
+		vector<Square*> legalMoves = selectedSquare->getPiece()->getLegalMoves();
+		resetSelectedSquare();
+		resetColorOfLegalMoves(legalMoves);
 	}
 	if (square->getPiece() != nullptr) {
 		selectedSquare = square;
-		square->getPiece()->showLegalMoves();
-		selectedSquare->highlight();
+		square->getPiece()->resetLegalMoves();
+	    square->getPiece()->findLegalMoves();
+		vector<Square*> legalMoves = square->getPiece()->getLegalMoves();
+		selectedSquare->highlightSelected();
+		for (Square* legalMove : legalMoves) {
+			legalMove->highlightMove();
+		}
+	}
+}
+
+void ChessBoard::resetSelectedSquare() {
+	selectedSquare->resetColor();
+	selectedSquare = nullptr;
+}
+
+void ChessBoard::resetColorOfLegalMoves(vector<Square*> legalMoves) {
+	for (Square* legalMove : legalMoves) {
+		legalMove->resetColor();
 	}
 }
