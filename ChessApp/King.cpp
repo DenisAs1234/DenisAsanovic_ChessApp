@@ -16,10 +16,11 @@ void King::findLegalMoves() {
 		int newFile = file + dir.second;
 
 		int index = getSquareIndex(newRank, newFile);
-		if (index != -1) {
-			if (!board->getAllSquares()[index]->isOccupied()) {
-				legalMoves.push_back(board->getAllSquares()[index]);
-			}
+		if (index == -1) continue;
+		
+		Square* newSquare = board->getAllSquares()[index];
+		if (!newSquare->isOccupied() || newSquare->getPiece()->getColor() != this->color) {
+			legalMoves.push_back(board->getAllSquares()[index]);
 		}
 	}
 }

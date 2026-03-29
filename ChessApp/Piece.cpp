@@ -1,14 +1,19 @@
 #include "Piece.h"
 #include "Square.h"
+#include "Pawn.h"
 #include "ChessBoard.h"
 #include "enums.h"
-using namespace std;
 
 Piece::Piece(PieceType type, PieceColor color, Square* square, QString path, ChessBoard* board) : 
-	type(type), color(color), square(square), path(path), board(board) {}
+	type(type), color(color), square(square), path(path), board(board) {
+}
 
 PieceType Piece::getType() {
 	return type;
+}
+
+PieceColor Piece::getColor() {
+	return color;
 }
 
 Square* Piece::getSquare() {
@@ -24,9 +29,7 @@ vector<Square*> Piece::getLegalMoves() {
 }
 
 void Piece::resetLegalMoves() {
-	for (Square* legalMove : legalMoves) {
-		legalMoves.pop_back();
-	}
+	legalMoves.clear();
 }
 
 void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
@@ -39,11 +42,16 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 
 		while (true) {
 			int index = getSquareIndex(newRank, newFile);
-
 			if (index == -1) break;
-			else if (board->getAllSquares()[index]->isOccupied()) break;
 
-			legalMoves.push_back(board->getAllSquares()[index]);
+			Square* newSquare = board->getAllSquares()[index];
+			if (newSquare->isOccupied()) {
+				if (this->color == newSquare->getPiece()->getColor()) break;
+				legalMoves.push_back(newSquare);
+				break;
+			}
+
+			legalMoves.push_back(newSquare);
 
 			newRank += dir.first;
 			newFile += dir.second;
@@ -51,10 +59,35 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 	}
 }
 
-void Piece::moveTo(Square* newSquare) {
+void Piece::moveTo(Square* destination) {
 	square->setPiece(nullptr);
-	square = newSquare;
-	newSquare->setPiece(this);
-	setPos(newSquare->getX() + 5, newSquare->getY() + 7);
+
+	Pawn* pawn = dynamic_cast<Pawn*>(this);
+	bool isEnPassantMove = false;
+	if (pawn) {
+		auto& enPassantMoves = pawn->getEnPassantMoves();
+		isEnPassantMove = find(enPassantMoves.begin(), enPassantMoves.end(), destination) 
+			!= enPassantMoves.end();
+	}
+
+	if (destination->isOccupied()) {
+		board->getScene()->removeItem(destination->getPiece());
+	}
+
+	if (isEnPassantMove) {
+		int index = (color == PieceColor::White)
+			? getSquareIndex(destination->getRank() - 1, destination->getFile())
+			: getSquareIndex(destination->getRank() + 1, destination->getFile());
+
+		Square* enPassantPos = board->getAllSquares()[index];
+		board->getScene()->removeItem(enPassantPos->getPiece());
+		enPassantPos->setPiece(nullptr);
+		pawn->getEnPassantMoves().clear();
+	}
+
+	square = destination;
+	destination->setPiece(this);
+	setPos(destination->getX() + 5, destination->getY() + 7);
+	board->clearEnPassants();
 	onMove();
 }

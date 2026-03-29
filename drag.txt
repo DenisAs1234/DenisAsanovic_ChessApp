@@ -1,0 +1,151 @@
+ChessBoard.h:
+
+Piece* draggingPiece = nullptr;
+QPointF dragOffset;
+QPointF originalPos;
+bool isDragging = false;
+bool wasDragging = false;
+
+Piece* getDraggingPiece();
+QPointF getDragOffset();
+QPointF getOriginalPos();
+bool getIsDragging();
+bool getWasDragging();
+
+void setDraggingPiece(Piece* piece);
+void setDragOffset(QPointF offset);
+void setOriginalPos(QPointF pos);
+void setIsDragging(bool isDragging);
+void setWasDragging(bool wasDragging);
+
+ChessBoard.cpp:
+
+Piece* ChessBoard::getDraggingPiece() { return draggingPiece; }
+
+QPointF ChessBoard::getDragOffset() { return dragOffset; }
+
+QPointF ChessBoard::getOriginalPos() { return originalPos; }
+
+bool ChessBoard::getIsDragging() { return isDragging; }
+
+bool ChessBoard::getWasDragging() { return wasDragging; }
+
+void ChessBoard::setDraggingPiece(Piece* piece) {
+	draggingPiece = piece;
+}
+
+void ChessBoard::setDragOffset(QPointF offset) {
+	dragOffset = offset;
+}
+
+void ChessBoard::setOriginalPos(QPointF pos) {
+	originalPos = pos;
+}
+
+void ChessBoard::setIsDragging(bool isDragging) {
+	this->isDragging = isDragging;
+}
+
+void ChessBoard::setWasDragging(bool wasDragging) {
+	this->wasDragging = wasDragging;
+}
+
+Square.h:
+
+void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
+Square.cpp:
+
+void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    Piece* piece = this->getPiece();
+    board->setWasDragging(false);
+
+    if (piece) {
+        board->selectSquare(this);
+
+        board->setDraggingPiece(piece);
+        board->setIsDragging(true);
+
+        QPointF centerInScene = piece->mapToScene(piece->boundingRect().center());
+        QPointF offset = event->scenePos() - centerInScene;
+        board->setDragOffset(offset);
+
+        board->setOriginalPos(piece->pos());
+
+        piece->setZValue(2);
+        return;
+    }
+
+    Square* selectedSquare = board->getSelectedSquare();
+
+    if (!selectedSquare) {
+        board->selectSquare(this);
+        return;
+    }
+
+    Piece* selectedPiece = selectedSquare->getPiece();
+    vector<Square*> legalMoves = selectedPiece->getLegalMoves();
+    bool isLegalMove = find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end();
+
+    if (isLegalMove) {
+        selectedPiece->moveTo(this);
+        board->resetSelectedSquare();
+        board->resetColorOfLegalMoves(legalMoves);
+    }
+    else {
+        board->selectSquare(this);
+    }
+
+    QGraphicsRectItem::mousePressEvent(event);
+}
+
+void Square::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    if (board->getIsDragging()) {
+        board->setWasDragging(true);
+    }
+
+    if (board->getIsDragging() && board->getDraggingPiece()) {
+        QPointF pos = event->scenePos() - board->getDragOffset();
+        board->getDraggingPiece()->setPos(pos);
+    }
+
+    QGraphicsRectItem::mouseMoveEvent(event);
+}
+
+void Square::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    Piece* draggingPiece = board->getDraggingPiece();
+
+    if (!board->getIsDragging() || !draggingPiece)
+        return;
+
+    if (!board->getWasDragging()) {
+        board->setDraggingPiece(nullptr);
+        board->setIsDragging(false);
+        return;
+    }
+
+    Square* target = board->getSquareAt(event->scenePos());
+    Square* fromSquare = draggingPiece->getSquare();
+
+    auto legalMoves = draggingPiece->getLegalMoves();
+    bool isLegal = find(legalMoves.begin(), legalMoves.end(), target) != legalMoves.end();
+
+    if (isLegal) {
+        draggingPiece->moveTo(target);
+    }
+    else {
+        draggingPiece->setPos(board->getOriginalPos());
+    }
+
+    draggingPiece->setZValue(1);
+
+    board->resetColorOfLegalMoves(legalMoves);
+    board->resetSelectedSquare();
+
+    board->setDraggingPiece(nullptr);
+    board->setIsDragging(false);
+
+    QGraphicsRectItem::mouseReleaseEvent(event);
+}

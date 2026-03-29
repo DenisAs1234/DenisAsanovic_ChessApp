@@ -16,17 +16,22 @@ class Square : public QGraphicsRectItem {
 	Piece* piece;
 	ChessBoard* board;
 public:
-	Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos, 
+	Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos,
 		ChessBoard* board, QGraphicsItem* parent = nullptr);
+
 	int getFile();
 	int getRank();
 	qreal getX();
 	qreal getY();
-	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+
 	Piece* getPiece();
 	void setPiece(Piece* piece);
+
 	void resetColor();
 	void highlightSelected();
 	void highlightMove();
+
 	bool isOccupied();
+
+	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };

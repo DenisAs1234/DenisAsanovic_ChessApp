@@ -15,14 +15,13 @@ void Knight::findLegalMoves() {
     };
 
     for (auto& move : possibleMoves) {
-        int newRank = rank + move.first;
-        int newFile = file + move.second;
+        int index = getSquareIndex(rank + move.first, file + move.second);
 
-        int index = getSquareIndex(newRank, newFile);
+        if (index == -1) continue;
+        Square* newSquare = board->getAllSquares()[index];
 
-        if (index != -1) {
-            if(!board->getAllSquares()[index]->isOccupied())
-                legalMoves.push_back(board->getAllSquares()[index]);
+        if (!newSquare->isOccupied() || newSquare->getPiece()->getColor() != this->color) {
+            legalMoves.push_back(board->getAllSquares()[index]);
         }
     }
 }

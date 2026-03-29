@@ -18,13 +18,17 @@ protected:
 	vector<Square*> legalMoves;
 public:
 	Piece(PieceType type, PieceColor color, Square* square, QString path, ChessBoard* board);
+
 	PieceType getType();
+	PieceColor getColor();
 	Square* getSquare();
 	QString getPath();
+
 	vector<Square*> getLegalMoves();
 	void resetLegalMoves();
 	virtual void findLegalMoves() = 0;
 	void findMovesInDirections(vector<pair<int, int>> directions);
+
 	void moveTo(Square* square);
 	virtual void onMove() {};
 };

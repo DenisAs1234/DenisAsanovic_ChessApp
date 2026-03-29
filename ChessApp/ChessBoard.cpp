@@ -80,21 +80,34 @@ void ChessBoard::setStartingPosition() {
 }
 
 void ChessBoard::selectSquare(Square* square) {
-	if (selectedSquare != nullptr) {
+	if (selectedSquare) {
 		vector<Square*> legalMoves = selectedSquare->getPiece()->getLegalMoves();
 		resetSelectedSquare();
 		resetColorOfLegalMoves(legalMoves);
 	}
-	if (square->getPiece() != nullptr) {
+
+	if (square->isOccupied()) {
 		selectedSquare = square;
-		square->getPiece()->resetLegalMoves();
-	    square->getPiece()->findLegalMoves();
-		vector<Square*> legalMoves = square->getPiece()->getLegalMoves();
+
+		Piece* piece = square->getPiece();
+		piece->resetLegalMoves();
+	    piece->findLegalMoves();
+		vector<Square*> legalMoves = piece->getLegalMoves();
+
 		selectedSquare->highlightSelected();
 		for (Square* legalMove : legalMoves) {
 			legalMove->highlightMove();
 		}
 	}
+}
+
+Square* ChessBoard::getSquareAt(QPointF pos) {
+	for (Square* square : allSquares) {
+		if (square->contains(square->mapFromScene(pos))) {
+			return square;
+		}
+	}
+	return nullptr;
 }
 
 void ChessBoard::resetSelectedSquare() {
@@ -105,5 +118,17 @@ void ChessBoard::resetSelectedSquare() {
 void ChessBoard::resetColorOfLegalMoves(vector<Square*> legalMoves) {
 	for (Square* legalMove : legalMoves) {
 		legalMove->resetColor();
+	}
+}
+
+void ChessBoard::clearEnPassants() {
+	int startOf4thRank = getSquareIndex(4, 0);
+	int endOf5thRank = getSquareIndex(5, 7);
+
+	for (int i = startOf4thRank; i <= endOf5thRank; i++) {
+		Pawn* pawn = dynamic_cast<Pawn*>(allSquares[i]->getPiece());
+		if (pawn) {
+			pawn->getEnPassantMoves().clear();
+		}
 	}
 }

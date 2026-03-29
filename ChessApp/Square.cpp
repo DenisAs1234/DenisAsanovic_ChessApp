@@ -11,10 +11,12 @@ Square::Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos, C
 
 	QColor darkSquare(194, 106, 62);
 	QColor lightSquare(247, 183, 151);
+
 	setRect(0, 0, 90, 90);
 	setBrush(QBrush(color == SquareColor::dark ? darkSquare : lightSquare));
 	setPen(Qt::NoPen);
 	setPos(xPos, yPos);
+
 	setAcceptedMouseButtons(Qt::LeftButton);
 }
 
@@ -26,52 +28,66 @@ qreal Square::getX() { return pos().x(); }
 
 qreal Square::getY() { return pos().y(); }
 
-void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-	Square* selectedSquare = board->getSelectedSquare();
-
-	if (!selectedSquare) {
-		board->selectSquare(this);
-		return;
-	}
-
-	Piece* piece = selectedSquare->getPiece();
-	vector<Square*> legalMoves = piece->getLegalMoves();
-	bool isLegalMove = find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end();
-
-	if (isLegalMove) {
-		piece->moveTo(this);
-		board->resetSelectedSquare();
-		board->resetColorOfLegalMoves(legalMoves);
-	}
-	else {
-		board->selectSquare(this);
-	}
-
-	QGraphicsRectItem::mousePressEvent(event);
-}
-
 Piece* Square::getPiece() {
-	return piece;
+    return piece;
 }
 
 void Square::setPiece(Piece* piece) {
-	this->piece = piece;
+    this->piece = piece;
 }
 
 void Square::resetColor() {
-	QColor darkSquare(194, 106, 62);
-	QColor lightSquare(247, 183, 151);
-	setBrush(QBrush(color == SquareColor::dark ? darkSquare : lightSquare));
+    QColor darkSquare(194, 106, 62);
+    QColor lightSquare(247, 183, 151);
+    setBrush(QBrush(color == SquareColor::dark ? darkSquare : lightSquare));
 }
 
 void Square::highlightSelected() {
-	setBrush(QBrush(color == SquareColor::dark ? QColor(252, 186, 3) : QColor(250, 209, 5)));
+    setBrush(QBrush(color == SquareColor::dark ? QColor(252, 186, 3) : QColor(250, 209, 5)));
 }
 
 void Square::highlightMove() {
-	setBrush(QBrush(color == SquareColor::dark ? QColor(30, 156, 52) : QColor(52, 235, 85)));
+    if (!this->isOccupied()) {
+        setBrush(QBrush(color == SquareColor::dark ? QColor(30, 156, 52) : QColor(52, 235, 85)));
+        return;
+    }
+    setBrush(QBrush(color == SquareColor::dark ? QColor(39, 117, 242) : QColor(66, 139, 255)));
 }
 
 bool Square::isOccupied() {
-	return this->getPiece() != nullptr;
+    return this->getPiece();
+}
+
+void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    Square* selectedSquare = board->getSelectedSquare();
+
+    if (!selectedSquare) {
+        if (this->getPiece()) {
+            board->selectSquare(this);
+        }
+        return;
+    }
+
+    Piece* piece = selectedSquare->getPiece();
+
+    if (!piece) {
+        board->selectSquare(this);
+        return;
+    }
+
+    vector<Square*> legalMoves = piece->getLegalMoves();
+
+    if (find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end()) {
+        piece->moveTo(this);
+        board->resetSelectedSquare();
+        board->resetColorOfLegalMoves(legalMoves);
+        return;
+    }
+
+    if (this->getPiece()) {
+        board->selectSquare(this);
+    }
+    else {
+        board->resetSelectedSquare();
+    }
 }
