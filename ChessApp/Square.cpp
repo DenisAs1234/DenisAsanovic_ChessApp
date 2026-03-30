@@ -62,32 +62,28 @@ void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     Square* selectedSquare = board->getSelectedSquare();
 
     if (!selectedSquare) {
-        if (this->getPiece()) {
-            board->selectSquare(this);
-        }
-        return;
-    }
-
-    Piece* piece = selectedSquare->getPiece();
-
-    if (!piece) {
+        if (this->isOccupied() && this->getPiece()->getColor() != board->getTurnColor()) return;
         board->selectSquare(this);
         return;
     }
 
-    vector<Square*> legalMoves = piece->getLegalMoves();
+    Piece* selectedPiece = selectedSquare->getPiece();
 
+    vector<Square*> legalMoves = selectedPiece->getLegalMoves();
     if (find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end()) {
-        piece->moveTo(this);
+        selectedPiece->moveTo(this);
         board->resetSelectedSquare();
         board->resetColorOfLegalMoves(legalMoves);
+        board->switchTurn();
         return;
     }
 
-    if (this->getPiece()) {
+    board->resetSelectedSquare();
+    board->resetColorOfLegalMoves(legalMoves);
+
+    if (this->isOccupied()) {
+        if (this->getPiece()->getColor() != board->getTurnColor()) return;
         board->selectSquare(this);
-    }
-    else {
-        board->resetSelectedSquare();
+        return;
     }
 }

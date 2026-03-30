@@ -103,6 +103,7 @@
     <ClCompile Include="Knight.cpp" />
     <ClCompile Include="Pawn.cpp" />
     <ClCompile Include="Piece.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Queen.cpp" />
     <ClCompile Include="Rook.cpp" />
     <ClCompile Include="Square.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="Pawn.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="PieceFactory.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Queen.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Rook.h" />

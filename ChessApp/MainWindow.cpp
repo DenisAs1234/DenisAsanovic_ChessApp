@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "ChessBoard.h"
+#include "Player.h"
 #include <QGraphicsView>
 
 MainWindow::MainWindow(QWidget* parent)

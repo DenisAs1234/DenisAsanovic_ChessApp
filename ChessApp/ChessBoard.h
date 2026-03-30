@@ -9,6 +9,7 @@ class ChessBoard : public QGraphicsRectItem {
 	QGraphicsScene* scene;
 	vector<Square*> allSquares;
 	Square* selectedSquare;
+	PieceColor turnColor = PieceColor::White;
 public:
 	ChessBoard(QGraphicsScene* scene);
 
@@ -21,11 +22,13 @@ public:
 	QGraphicsScene* getScene();
 	vector<Square*> getAllSquares();
 	Square* getSelectedSquare();
+	PieceColor getTurnColor();
 
-	Square* getSquareAt(QPointF pos);
+	//Square* getSquareAt(QPointF pos);
 
 	void resetSelectedSquare();
 	void resetColorOfLegalMoves(vector<Square*> legalMoves);
 
 	void clearEnPassants();
+	void switchTurn();
 };

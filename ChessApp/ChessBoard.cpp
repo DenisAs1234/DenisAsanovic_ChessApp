@@ -14,6 +14,8 @@ vector<Square*> ChessBoard::getAllSquares() { return allSquares; }
 
 Square* ChessBoard::getSelectedSquare() { return selectedSquare; }
 
+PieceColor ChessBoard::getTurnColor() { return turnColor; }
+
 void ChessBoard::drawBoard() {
 	SquareColor color = SquareColor::dark;
 	int xPos = 0;
@@ -77,6 +79,7 @@ void ChessBoard::setStartingPosition() {
 			}
 		}
 	}
+
 }
 
 void ChessBoard::selectSquare(Square* square) {
@@ -100,7 +103,7 @@ void ChessBoard::selectSquare(Square* square) {
 		}
 	}
 }
-
+/*
 Square* ChessBoard::getSquareAt(QPointF pos) {
 	for (Square* square : allSquares) {
 		if (square->contains(square->mapFromScene(pos))) {
@@ -108,7 +111,7 @@ Square* ChessBoard::getSquareAt(QPointF pos) {
 		}
 	}
 	return nullptr;
-}
+}*/
 
 void ChessBoard::resetSelectedSquare() {
 	selectedSquare->resetColor();
@@ -131,4 +134,8 @@ void ChessBoard::clearEnPassants() {
 			pawn->getEnPassantMoves().clear();
 		}
 	}
+}
+
+void ChessBoard::switchTurn() {
+	turnColor = (turnColor == PieceColor::White) ? PieceColor::Black : PieceColor::White;
 }
