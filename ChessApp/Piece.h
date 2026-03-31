@@ -16,6 +16,7 @@ protected:
 	QString path;
 	ChessBoard* board;
 	vector<Square*> legalMoves;
+	vector<Square*> visibleSquares;
 public:
 	Piece(PieceType type, PieceColor color, Square* square, QString path, ChessBoard* board);
 
@@ -24,8 +25,9 @@ public:
 	Square* getSquare();
 	QString getPath();
 
+	vector<Square*> getVisibleSquares();
 	vector<Square*> getLegalMoves();
-	void resetLegalMoves();
+
 	virtual void findLegalMoves() = 0;
 	void findMovesInDirections(vector<pair<int, int>> directions);
 

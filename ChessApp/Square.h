@@ -32,6 +32,7 @@ public:
 	void highlightMove();
 
 	bool isOccupied();
+	bool isSafe(PieceColor turnColor);
 
 	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };

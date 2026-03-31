@@ -6,6 +6,9 @@ Pawn::Pawn(PieceColor color, Square* square, QString path, ChessBoard* board) :
 	Piece(PieceType::Pawn, color, square, path, board) {}
 
 void Pawn::findLegalMoves() {
+	legalMoves.clear();
+	visibleSquares.clear();
+
 	int rank = square->getRank();
 	int file = square->getFile();
 	int forwardBy = 1;
@@ -27,7 +30,18 @@ void Pawn::findLegalMoves() {
 		else break;
 	}
 
+	getCaptures(rank, file);
+
+	for (auto& enPassantMove : enPassantMoves) {
+		legalMoves.push_back(enPassantMove);
+	}
+}
+
+void Pawn::getCaptures(int rank, int file) {
+	visibleSquares.clear();
+
 	vector<pair<int, int>> diagonalCaptures = { {1,1},{1,-1} };
+	int index;
 	for (auto& capture : diagonalCaptures) {
 		index = (color == PieceColor::White)
 			? getSquareIndex(rank + capture.first, file + capture.second)
@@ -35,16 +49,13 @@ void Pawn::findLegalMoves() {
 
 		if (index == -1) continue;
 		Square* newCapture = board->getAllSquares()[index];
+		visibleSquares.push_back(newCapture);
 
 		if (newCapture->isOccupied()) {
 			if (newCapture->getPiece()->getColor() != this->color) {
 				legalMoves.push_back(newCapture);
 			}
 		}
-	}
-
-	for (auto& enPassantMove : enPassantMoves) {
-		legalMoves.push_back(enPassantMove);
 	}
 }
 

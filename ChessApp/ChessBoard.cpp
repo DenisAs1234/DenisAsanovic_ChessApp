@@ -2,6 +2,7 @@
 #include "pieceTypes.h"
 #include "PieceFactory.h"
 #include "enums.h"
+#include "Player.h"
 #include<QGraphicsRectItem>
 #include<vector>
 
@@ -79,12 +80,11 @@ void ChessBoard::setStartingPosition() {
 			}
 		}
 	}
-
 }
 
 void ChessBoard::selectSquare(Square* square) {
 	if (selectedSquare) {
-		vector<Square*> legalMoves = selectedSquare->getPiece()->getLegalMoves();
+		auto legalMoves = selectedSquare->getPiece()->getLegalMoves();
 		resetSelectedSquare();
 		resetColorOfLegalMoves(legalMoves);
 	}
@@ -93,9 +93,8 @@ void ChessBoard::selectSquare(Square* square) {
 		selectedSquare = square;
 
 		Piece* piece = square->getPiece();
-		piece->resetLegalMoves();
 	    piece->findLegalMoves();
-		vector<Square*> legalMoves = piece->getLegalMoves();
+		auto legalMoves = piece->getLegalMoves();
 
 		selectedSquare->highlightSelected();
 		for (Square* legalMove : legalMoves) {
@@ -103,15 +102,6 @@ void ChessBoard::selectSquare(Square* square) {
 		}
 	}
 }
-/*
-Square* ChessBoard::getSquareAt(QPointF pos) {
-	for (Square* square : allSquares) {
-		if (square->contains(square->mapFromScene(pos))) {
-			return square;
-		}
-	}
-	return nullptr;
-}*/
 
 void ChessBoard::resetSelectedSquare() {
 	selectedSquare->resetColor();

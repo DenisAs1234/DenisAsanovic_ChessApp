@@ -24,8 +24,6 @@ public:
 	Square* getSelectedSquare();
 	PieceColor getTurnColor();
 
-	//Square* getSquareAt(QPointF pos);
-
 	void resetSelectedSquare();
 	void resetColorOfLegalMoves(vector<Square*> legalMoves);
 

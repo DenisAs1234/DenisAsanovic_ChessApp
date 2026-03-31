@@ -1,5 +1,6 @@
 #include "Square.h"
 #include "Piece.h"
+#include "King.h"
 #include "ChessBoard.h"
 #include<QGraphicsRectItem>
 #include<QBrush>
@@ -58,6 +59,33 @@ bool Square::isOccupied() {
     return this->getPiece();
 }
 
+bool Square::isSafe(PieceColor turnColor) {
+    PieceColor attackerColor = turnColor == PieceColor::White ? PieceColor::Black : PieceColor::White;
+    auto allSquares = board->getAllSquares();
+
+    for (Square* square : allSquares) {
+        if (!square->isOccupied()) continue;
+
+        Piece* piece = square->getPiece();
+        if (piece->getColor() != attackerColor) continue;
+
+        King* king = dynamic_cast<King*>(piece);
+        if (king) {
+            king->findVisibleSquares();
+        }
+        else {
+            piece->findLegalMoves();
+        }
+       
+        auto attackedSquares = piece->getVisibleSquares();
+
+        if (find(attackedSquares.begin(), attackedSquares.end(), this) != attackedSquares.end()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     Square* selectedSquare = board->getSelectedSquare();
 
@@ -69,7 +97,7 @@ void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
     Piece* selectedPiece = selectedSquare->getPiece();
 
-    vector<Square*> legalMoves = selectedPiece->getLegalMoves();
+    auto legalMoves = selectedPiece->getLegalMoves();
     if (find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end()) {
         selectedPiece->moveTo(this);
         board->resetSelectedSquare();

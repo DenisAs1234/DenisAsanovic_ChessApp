@@ -28,8 +28,8 @@ vector<Square*> Piece::getLegalMoves() {
 	return legalMoves;
 }
 
-void Piece::resetLegalMoves() {
-	legalMoves.clear();
+vector<Square*> Piece::getVisibleSquares() {
+	return visibleSquares;
 }
 
 void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
@@ -45,6 +45,8 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 			if (index == -1) break;
 
 			Square* newSquare = board->getAllSquares()[index];
+			visibleSquares.push_back(newSquare);
+
 			if (newSquare->isOccupied()) {
 				if (this->color == newSquare->getPiece()->getColor()) break;
 				legalMoves.push_back(newSquare);
