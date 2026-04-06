@@ -29,8 +29,10 @@ public:
 	vector<Square*> getLegalMoves();
 
 	virtual void findLegalMoves() = 0;
+	virtual void findVisibleSquares() = 0;
 	void findMovesInDirections(vector<pair<int, int>> directions);
 
 	void moveTo(Square* square);
 	virtual void onMove() {};
+	bool isMoveLegal(Square* square);
 };

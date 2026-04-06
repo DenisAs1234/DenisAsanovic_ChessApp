@@ -39,3 +39,11 @@ void King::findVisibleSquares() {
 		visibleSquares.push_back(newSquare);
 	}
 }
+
+void King::onMove() {
+	if (color == PieceColor::White) {
+		board->setWhiteKingPos(square);
+		return;
+	}
+	board->setBlackKingPos(square);
+}

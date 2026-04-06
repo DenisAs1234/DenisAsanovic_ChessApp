@@ -48,12 +48,9 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 			visibleSquares.push_back(newSquare);
 
 			if (newSquare->isOccupied()) {
-				if (this->color == newSquare->getPiece()->getColor()) break;
-				legalMoves.push_back(newSquare);
+				visibleSquares.push_back(newSquare);
 				break;
 			}
-
-			legalMoves.push_back(newSquare);
 
 			newRank += dir.first;
 			newFile += dir.second;
@@ -70,21 +67,13 @@ void Piece::moveTo(Square* destination) {
 		auto& enPassantMoves = pawn->getEnPassantMoves();
 		isEnPassantMove = find(enPassantMoves.begin(), enPassantMoves.end(), destination) 
 			!= enPassantMoves.end();
+		if (isEnPassantMove) {
+			pawn->executeEnPassant(destination);
+		}
 	}
 
 	if (destination->isOccupied()) {
 		board->getScene()->removeItem(destination->getPiece());
-	}
-
-	if (isEnPassantMove) {
-		int index = (color == PieceColor::White)
-			? getSquareIndex(destination->getRank() - 1, destination->getFile())
-			: getSquareIndex(destination->getRank() + 1, destination->getFile());
-
-		Square* enPassantPos = board->getAllSquares()[index];
-		board->getScene()->removeItem(enPassantPos->getPiece());
-		enPassantPos->setPiece(nullptr);
-		pawn->getEnPassantMoves().clear();
 	}
 
 	square = destination;
@@ -92,4 +81,27 @@ void Piece::moveTo(Square* destination) {
 	setPos(destination->getX() + 5, destination->getY() + 7);
 	board->clearEnPassants();
 	onMove();
+}
+
+bool Piece::isMoveLegal(Square* destination) {
+	square->setPiece(nullptr);
+
+	Square* originalSquare = square;
+	square = destination;
+
+	Piece* onDestination = destination->getPiece();
+	destination->setPiece(this);
+
+	bool isKingInCheck = board->isKingInCheck(color);
+
+	square = originalSquare;
+	square->setPiece(this);
+	if (onDestination) {
+		destination->setPiece(onDestination);
+	}
+	else {
+		destination->setPiece(nullptr);
+	}
+
+	return isKingInCheck;
 }

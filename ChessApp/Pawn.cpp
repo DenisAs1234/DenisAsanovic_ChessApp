@@ -7,7 +7,6 @@ Pawn::Pawn(PieceColor color, Square* square, QString path, ChessBoard* board) :
 
 void Pawn::findLegalMoves() {
 	legalMoves.clear();
-	visibleSquares.clear();
 
 	int rank = square->getRank();
 	int file = square->getFile();
@@ -22,7 +21,10 @@ void Pawn::findLegalMoves() {
 		Square* newSquare = board->getAllSquares()[index];
 
 		if (newSquare->isOccupied()) break;
-		legalMoves.push_back(newSquare);
+
+		if (isMoveLegal(newSquare)) {
+			legalMoves.push_back(newSquare);
+		}
 
 		if (!hasMoved) {
 			forwardBy += 1;
@@ -33,15 +35,33 @@ void Pawn::findLegalMoves() {
 	getCaptures(rank, file);
 
 	for (auto& enPassantMove : enPassantMoves) {
-		legalMoves.push_back(enPassantMove);
+		if (isEnPassantLegal(enPassantMove)) {
+			legalMoves.push_back(enPassantMove);
+		}
 	}
 }
 
 void Pawn::getCaptures(int rank, int file) {
+	findVisibleSquares();
+
+	for (Square* newCapture : visibleSquares) {
+		if (!newCapture->isOccupied()) continue;
+		if (newCapture->getPiece()->getColor() == this->color) continue;
+
+		if (isMoveLegal(newCapture)) {
+			legalMoves.push_back(newCapture);
+		}
+	}
+}
+
+void Pawn::findVisibleSquares() {
 	visibleSquares.clear();
 
+	int rank = square->getRank();
+	int file = square->getFile();
 	vector<pair<int, int>> diagonalCaptures = { {1,1},{1,-1} };
 	int index;
+
 	for (auto& capture : diagonalCaptures) {
 		index = (color == PieceColor::White)
 			? getSquareIndex(rank + capture.first, file + capture.second)
@@ -50,12 +70,6 @@ void Pawn::getCaptures(int rank, int file) {
 		if (index == -1) continue;
 		Square* newCapture = board->getAllSquares()[index];
 		visibleSquares.push_back(newCapture);
-
-		if (newCapture->isOccupied()) {
-			if (newCapture->getPiece()->getColor() != this->color) {
-				legalMoves.push_back(newCapture);
-			}
-		}
 	}
 }
 
@@ -98,4 +112,39 @@ void Pawn::checkForPawnsNextTo(Pawn* passingPawn) {
 
 vector<Square*>& Pawn::getEnPassantMoves() {
 	return enPassantMoves;
+}
+
+void Pawn::executeEnPassant(Square* destination) {
+	int index = (color == PieceColor::White)
+		? getSquareIndex(destination->getRank() - 1, destination->getFile())
+		: getSquareIndex(destination->getRank() + 1, destination->getFile());
+
+	Square* enPassantPos = board->getAllSquares()[index];
+	board->getScene()->removeItem(enPassantPos->getPiece());
+	enPassantPos->setPiece(nullptr);
+	enPassantMoves.clear();
+}
+
+bool Pawn::isEnPassantLegal(Square* destination) {
+	int index = (color == PieceColor::White)
+		? getSquareIndex(destination->getRank() - 1, destination->getFile())
+		: getSquareIndex(destination->getRank() + 1, destination->getFile());
+
+	Square* enPassantPos = board->getAllSquares()[index]; //polje na kojem se nalazi pješak u prolazu
+	Piece* onEnPassantPos = enPassantPos->getPiece(); //pješak u prolazu
+	enPassantPos->setPiece(nullptr); //micanje pješaka u prolazu s ploèe
+
+	Square* originalSquare = square; //spremanje originalnog polja ovog pješaka (this) koji uzima
+	square->setPiece(nullptr); //micanje ovog pješaka s originalnog polja
+	square = destination; //polje ovog pješaka postaje njegova destinacija (iza pješaka u prolazu)
+	destination->setPiece(this); //postavljanje ovog pješaka na destinaciju
+
+	bool isKingInCheck = board->isKingInCheck(color);
+
+	square = originalSquare; //polje ovog pješaka postaje originalno polje
+	enPassantPos->setPiece(onEnPassantPos); //vraæanje pješaka u prolazu na njegovo originalno polje
+	destination->setPiece(nullptr); //micanje ovog pješaka s destinacije
+	square->setPiece(this); //postavljanje ovog pješaka na originalno polje
+
+	return isKingInCheck;
 }

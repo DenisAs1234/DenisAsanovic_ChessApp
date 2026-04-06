@@ -69,14 +69,7 @@ bool Square::isSafe(PieceColor turnColor) {
         Piece* piece = square->getPiece();
         if (piece->getColor() != attackerColor) continue;
 
-        King* king = dynamic_cast<King*>(piece);
-        if (king) {
-            king->findVisibleSquares();
-        }
-        else {
-            piece->findLegalMoves();
-        }
-       
+        piece->findVisibleSquares();
         auto attackedSquares = piece->getVisibleSquares();
 
         if (find(attackedSquares.begin(), attackedSquares.end(), this) != attackedSquares.end()) {

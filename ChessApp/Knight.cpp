@@ -7,6 +7,18 @@ Knight::Knight(PieceColor color, Square* square, QString path, ChessBoard* board
 
 void Knight::findLegalMoves() {
     legalMoves.clear();
+    findVisibleSquares();
+
+    for(Square* newSquare : visibleSquares) {
+        if (newSquare->isOccupied() && newSquare->getPiece()->getColor() == this->color) continue;
+        
+        if (isMoveLegal(newSquare)) {
+            legalMoves.push_back(newSquare);
+        }
+    }
+}
+
+void Knight::findVisibleSquares() {
     visibleSquares.clear();
 
     int rank = square->getRank();
@@ -23,9 +35,5 @@ void Knight::findLegalMoves() {
         if (index == -1) continue;
         Square* newSquare = board->getAllSquares()[index];
         visibleSquares.push_back(newSquare);
-
-        if (!newSquare->isOccupied() || newSquare->getPiece()->getColor() != this->color) {
-            legalMoves.push_back(board->getAllSquares()[index]);
-        }
     }
 }

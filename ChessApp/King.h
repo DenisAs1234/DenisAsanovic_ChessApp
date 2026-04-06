@@ -7,5 +7,6 @@ class King : public Piece {
 public:
 	King(PieceColor color, Square* square, QString path, ChessBoard* board);
 	void findLegalMoves() override;
-	void findVisibleSquares();
+	void findVisibleSquares() override;
+	void onMove() override;
 };

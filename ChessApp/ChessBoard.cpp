@@ -10,12 +10,14 @@ ChessBoard::ChessBoard(QGraphicsScene* scene)
 	: scene(scene), allSquares(64) {}
 
 QGraphicsScene* ChessBoard::getScene() { return scene; }
-
 vector<Square*> ChessBoard::getAllSquares() { return allSquares; }
-
 Square* ChessBoard::getSelectedSquare() { return selectedSquare; }
-
 PieceColor ChessBoard::getTurnColor() { return turnColor; }
+
+Square* ChessBoard::getWhiteKingPos() { return whiteKingPos; }
+Square* ChessBoard::getBlackKingPos() { return blackKingPos; }
+void ChessBoard::setWhiteKingPos(Square* square) { whiteKingPos = square; }
+void ChessBoard::setBlackKingPos(Square* square) { blackKingPos = square; }
 
 void ChessBoard::drawBoard() {
 	SquareColor color = SquareColor::dark;
@@ -65,6 +67,15 @@ void ChessBoard::setStartingPosition() {
 				Piece* piece = createPiece(type, color, square, path, this);
 				drawPiece(piece);
 				square->setPiece(piece);
+				
+				if (type == PieceType::King) {
+					if (rank == 1) {
+						whiteKingPos = allSquares[(rank - 1) * 8 + file];
+					}
+					else {
+						blackKingPos = allSquares[(rank - 1) * 8 + file];
+					}
+				}
 				file++;
 			}
 		}
@@ -101,6 +112,13 @@ void ChessBoard::selectSquare(Square* square) {
 			legalMove->highlightMove();
 		}
 	}
+}
+
+bool ChessBoard::isKingInCheck(PieceColor turnColor) {
+	if (turnColor == PieceColor::White) {
+		return whiteKingPos->isSafe(turnColor);
+	}
+	return blackKingPos->isSafe(turnColor);
 }
 
 void ChessBoard::resetSelectedSquare() {

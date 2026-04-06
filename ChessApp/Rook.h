@@ -7,4 +7,5 @@ class Rook : public Piece {
 public:
 	Rook(PieceColor color, Square* square, QString path, ChessBoard* board);
 	void findLegalMoves() override;
+	void findVisibleSquares() override;
 };
