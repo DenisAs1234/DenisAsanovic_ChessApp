@@ -20,3 +20,12 @@ void Rook::findVisibleSquares() {
 	visibleSquares.clear();
 	findMovesInDirections({ {1,0}, {0,1}, {-1,0}, {0,-1} });
 }
+
+bool Rook::getHasMoved() {
+	return hasMoved;
+}
+
+void Rook::onMove() {
+	if (hasMoved) return;
+	hasMoved = true;
+}

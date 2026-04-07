@@ -23,6 +23,10 @@ enum class ChessVariant {
 	Standard, Chess960, Atomic
 };
 
+enum class CastlingType {
+    Short, Long
+};
+
 inline const map<PieceType, QString> pieceStrings = {
     {PieceType::Pawn,   "Pawn"},
     {PieceType::Knight, "Knight"},
