@@ -8,6 +8,7 @@ King::King(PieceColor color, Square* square, QString path, ChessBoard* board) :
 
 void King::findLegalMoves() {
 	legalMoves.clear();
+	castlingMoves.clear();
 
 	findVisibleSquares();
 	auto visibleSquares = getVisibleSquares();
@@ -27,12 +28,12 @@ void King::findLegalMoves() {
 	int file = square->getFile();
 
 	if (canCastle(CastlingType::Short)) {
-		int index = getSquareIndex(rank, file + 2);
+		int index = getSquareIndex(rank, 6);
 		Square* castlingSquare = board->getAllSquares()[index];
 		legalMoves.push_back(castlingSquare);
 	}
 	if (canCastle(CastlingType::Long)) {
-		int index = getSquareIndex(rank, file - 2);
+		int index = getSquareIndex(rank, 2);
 		Square* castlingSquare = board->getAllSquares()[index];
 		legalMoves.push_back(castlingSquare);
 	}
@@ -71,12 +72,15 @@ void King::onMove() {
 }
 
 bool King::canCastle(CastlingType castlingType) {
-	int rank = (color == PieceColor::White) ? 1 : 8;
+	int rank = square->getRank();
 	int file = square->getFile();
 
 	int step = (castlingType == CastlingType::Short) ? 1 : -1;
 	file += step;
 	auto allSquares = board->getAllSquares();
+	Square* kingDestination = (castlingType == CastlingType::Short)
+		? allSquares[getSquareIndex(rank, 6)]
+		: allSquares[getSquareIndex(rank, 2)];
 
 	while (file >= 0 && file <= 7) {
 		int index = getSquareIndex(rank, file);
@@ -89,7 +93,31 @@ bool King::canCastle(CastlingType castlingType) {
 			continue;
 		}
 		if (rook->getHasMoved()) return false;
+		castlingMoves.push_back(pair<Square*, Rook*>(kingDestination, rook));
 		return true;
 	}
 	return false;
+}
+
+void King::checkIfCastlingMove(Square* destination) {
+	findVisibleSquares();
+	bool isCastlingMove = find(visibleSquares.begin(), visibleSquares.end(), destination)
+		== visibleSquares.end();
+	if (isCastlingMove) {
+		executeCastling(destination);
+	}
+}
+
+void King::executeCastling(Square* destination) {
+	auto allSquares = board->getAllSquares();
+	Square* rookDestination = (destination->getFile() == 6)
+		? allSquares[getSquareIndex(destination->getRank(), 5)]
+		: allSquares[getSquareIndex(destination->getRank(), 3)];
+
+	for (auto& castlingMove : castlingMoves) {
+		if (destination == castlingMove.first) {
+			castlingMove.second->moveTo(rookDestination);
+			break;
+		}
+	}
 }

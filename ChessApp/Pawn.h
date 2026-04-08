@@ -15,6 +15,8 @@ public:
 
 	void checkForPawnsNextTo(Pawn* passingPawn);
 	vector<Square*>& getEnPassantMoves();
+
+	void checkIfEnPassant(Square* destination);
 	void executeEnPassant(Square* destination);
 	bool isEnPassantLegal(Square* destination);
 };

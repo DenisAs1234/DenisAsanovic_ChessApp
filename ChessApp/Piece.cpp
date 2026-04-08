@@ -1,6 +1,6 @@
 #include "Piece.h"
 #include "Square.h"
-#include "Pawn.h"
+#include "pieceTypes.h"
 #include "ChessBoard.h"
 #include "enums.h"
 
@@ -18,6 +18,10 @@ PieceColor Piece::getColor() {
 
 Square* Piece::getSquare() {
 	return square;
+}
+
+void Piece::setSquare(Square* square) {
+	this->square = square;
 }
 
 QString Piece::getPath() {
@@ -62,14 +66,13 @@ void Piece::moveTo(Square* destination) {
 	square->setPiece(nullptr);
 
 	Pawn* pawn = dynamic_cast<Pawn*>(this);
-	bool isEnPassantMove = false;
 	if (pawn) {
-		auto& enPassantMoves = pawn->getEnPassantMoves();
-		isEnPassantMove = find(enPassantMoves.begin(), enPassantMoves.end(), destination) 
-			!= enPassantMoves.end();
-		if (isEnPassantMove) {
-			pawn->executeEnPassant(destination);
-		}
+		pawn->checkIfEnPassant(destination);
+	}
+
+	King* king = dynamic_cast<King*>(this);
+	if (king) {
+		king->checkIfCastlingMove(destination);
 	}
 
 	if (destination->isOccupied()) {

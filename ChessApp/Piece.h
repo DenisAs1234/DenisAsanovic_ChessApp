@@ -23,6 +23,7 @@ public:
 	PieceType getType();
 	PieceColor getColor();
 	Square* getSquare();
+	void setSquare(Square* square);
 	QString getPath();
 
 	vector<Square*> getVisibleSquares();

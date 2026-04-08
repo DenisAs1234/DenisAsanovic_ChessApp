@@ -114,6 +114,14 @@ vector<Square*>& Pawn::getEnPassantMoves() {
 	return enPassantMoves;
 }
 
+void Pawn::checkIfEnPassant(Square* destination) {
+	bool isEnPassantMove = find(enPassantMoves.begin(), enPassantMoves.end(), destination)
+		!= enPassantMoves.end();
+	if (isEnPassantMove) {
+		executeEnPassant(destination);
+	}
+}
+
 void Pawn::executeEnPassant(Square* destination) {
 	int index = (color == PieceColor::White)
 		? getSquareIndex(destination->getRank() - 1, destination->getFile())
