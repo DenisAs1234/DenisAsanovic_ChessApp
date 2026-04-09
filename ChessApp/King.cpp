@@ -16,7 +16,7 @@ void King::findLegalMoves() {
 	for (Square* newSquare : visibleSquares) {
 		if (newSquare->isOccupied() && newSquare->getPiece()->getColor() == this->color) continue;
 
-		if (newSquare->isSafe(color)) {
+		if (isMoveLegal(newSquare)) {
 			legalMoves.push_back(newSquare);
 		}
 	}
@@ -120,4 +120,5 @@ void King::executeCastling(Square* destination) {
 			break;
 		}
 	}
+
 }

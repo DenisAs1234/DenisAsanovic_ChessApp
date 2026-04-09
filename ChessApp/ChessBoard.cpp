@@ -116,9 +116,9 @@ void ChessBoard::selectSquare(Square* square) {
 
 bool ChessBoard::isKingInCheck(PieceColor turnColor) {
 	if (turnColor == PieceColor::White) {
-		return whiteKingPos->isSafe(turnColor);
+		return !whiteKingPos->isSafe(turnColor);
 	}
-	return blackKingPos->isSafe(turnColor);
+	return !blackKingPos->isSafe(turnColor);
 }
 
 void ChessBoard::resetSelectedSquare() {

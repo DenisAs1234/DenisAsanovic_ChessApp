@@ -19,4 +19,7 @@ public:
 	void checkIfEnPassant(Square* destination);
 	void executeEnPassant(Square* destination);
 	bool isEnPassantLegal(Square* destination);
+
+	bool checkIfPromotion(Square* destination);
+	Piece* getPromotionPiece(Square* destination);
 };

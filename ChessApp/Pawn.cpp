@@ -1,4 +1,5 @@
 #include "Pawn.h"
+#include "PieceFactory.h"
 #include "ChessBoard.h"
 #include "SquareIndex.h"
 
@@ -154,5 +155,23 @@ bool Pawn::isEnPassantLegal(Square* destination) {
 	destination->setPiece(nullptr); //micanje ovog pješaka s destinacije
 	square->setPiece(this); //postavljanje ovog pješaka na originalno polje
 
-	return isKingInCheck;
+	return isKingInCheck ? false : true;
+}
+
+bool Pawn::checkIfPromotion(Square* destination) {
+	int rank = destination->getRank();
+	if (rank == 1 || rank == 8) {
+		return true;
+	}
+	return false;
+}
+
+Piece* Pawn::getPromotionPiece(Square* destination) {
+	board->getScene()->removeItem(this);
+
+	QString path = ":/assets/" + colorStrings.at(color) + "Queen.png";
+	Piece* piece = createPiece(PieceType::Queen, color, destination, path, board);
+
+	board->drawPiece(piece);
+	return piece;
 }

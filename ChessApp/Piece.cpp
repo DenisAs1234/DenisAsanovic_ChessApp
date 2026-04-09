@@ -66,8 +66,10 @@ void Piece::moveTo(Square* destination) {
 	square->setPiece(nullptr);
 
 	Pawn* pawn = dynamic_cast<Pawn*>(this);
+	bool isPromotion = false;
 	if (pawn) {
 		pawn->checkIfEnPassant(destination);
+		isPromotion = pawn->checkIfPromotion(destination);
 	}
 
 	King* king = dynamic_cast<King*>(this);
@@ -77,21 +79,32 @@ void Piece::moveTo(Square* destination) {
 
 	if (destination->isOccupied()) {
 		board->getScene()->removeItem(destination->getPiece());
+		if (isPromotion) {
+			destination->setPiece(pawn->getPromotionPiece(destination));
+		}
 	}
 
-	square = destination;
-	destination->setPiece(this);
-	setPos(destination->getX() + 5, destination->getY() + 7);
+	if (!isPromotion) {
+		square = destination;
+		destination->setPiece(this);
+		setPos(destination->getX() + 5, destination->getY() + 7);
+	}
 	board->clearEnPassants();
 	onMove();
 }
 
 bool Piece::isMoveLegal(Square* destination) {
 	square->setPiece(nullptr);
-
+	
 	Square* originalSquare = square;
 	square = destination;
 
+	King* king = dynamic_cast<King*>(this);
+	if (king) {
+		if (color == PieceColor::White) { board->setWhiteKingPos(destination); }
+		else { board->setBlackKingPos(destination); }
+	}
+	
 	Piece* onDestination = destination->getPiece();
 	destination->setPiece(this);
 
@@ -106,5 +119,10 @@ bool Piece::isMoveLegal(Square* destination) {
 		destination->setPiece(nullptr);
 	}
 
-	return isKingInCheck;
+	if (king) {
+		if (color == PieceColor::White) { board->setWhiteKingPos(originalSquare); }
+		else { board->setBlackKingPos(originalSquare); }
+	}
+
+	return isKingInCheck ? false : true;
 }
