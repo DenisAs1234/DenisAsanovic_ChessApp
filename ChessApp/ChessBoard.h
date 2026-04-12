@@ -12,6 +12,7 @@ class ChessBoard : public QGraphicsRectItem {
 	PieceColor turnColor = PieceColor::White;
 	Square* whiteKingPos;
 	Square* blackKingPos;
+	bool promotionMenuActive = false;
 public:
 	ChessBoard(QGraphicsScene* scene);
 
@@ -30,6 +31,10 @@ public:
 	Square* getBlackKingPos();
 	void setWhiteKingPos(Square* square);
 	void setBlackKingPos(Square* square);
+
+	bool getPromotionMenuActive();
+	void setPromotionMenuActive(bool isActive);
+	void removePromotionMenu();
 
 	bool isKingInCheck(PieceColor turnColor);
 

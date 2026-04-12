@@ -3,9 +3,12 @@
 #include "Piece.h"
 #include "enums.h"
 
+class PromotionType;
+
 class Pawn : public Piece {
 	bool hasMoved = false;
 	vector<Square*> enPassantMoves;
+	Piece* promotedTo;
 public:
 	Pawn(PieceColor color, Square* square, QString path, ChessBoard* board);
 	void findLegalMoves() override;
@@ -21,5 +24,7 @@ public:
 	bool isEnPassantLegal(Square* destination);
 
 	bool checkIfPromotion(Square* destination);
-	Piece* getPromotionPiece(Square* destination);
+	void createPromotionPiece(PieceType type, Square* destination);
+	void drawPromotionSelector(Square* destination);
+	Piece* getPromotedTo();
 };

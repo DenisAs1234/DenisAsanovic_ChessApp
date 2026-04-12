@@ -80,6 +80,8 @@ bool Square::isSafe(PieceColor turnColor) {
 }
 
 void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if (board->getPromotionMenuActive()) return;
+
     Square* selectedSquare = board->getSelectedSquare();
 
     if (!selectedSquare) {

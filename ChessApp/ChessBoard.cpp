@@ -19,6 +19,9 @@ Square* ChessBoard::getBlackKingPos() { return blackKingPos; }
 void ChessBoard::setWhiteKingPos(Square* square) { whiteKingPos = square; }
 void ChessBoard::setBlackKingPos(Square* square) { blackKingPos = square; }
 
+bool ChessBoard::getPromotionMenuActive() { return promotionMenuActive; }
+void ChessBoard::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
+
 void ChessBoard::drawBoard() {
 	SquareColor color = SquareColor::dark;
 	int xPos = 0;
@@ -146,4 +149,8 @@ void ChessBoard::clearEnPassants() {
 
 void ChessBoard::switchTurn() {
 	turnColor = (turnColor == PieceColor::White) ? PieceColor::Black : PieceColor::White;
+}
+
+void ChessBoard::removePromotionMenu() {
+
 }

@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include "ChessBoard.h"
-#include "Player.h"
 #include <QGraphicsView>
 
 MainWindow::MainWindow(QWidget* parent)
@@ -9,11 +8,12 @@ MainWindow::MainWindow(QWidget* parent)
     resize(1550, 800);
 
     board = new ChessBoard(new QGraphicsScene(this));
-    board->drawBoard();
-    board->setStartingPosition();
 
     view = new QGraphicsView(board->getScene(), this);
     setCentralWidget(view);
+
+    board->drawBoard();
+    board->setStartingPosition();
 }
 
 MainWindow::~MainWindow()

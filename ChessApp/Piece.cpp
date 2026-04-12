@@ -79,16 +79,17 @@ void Piece::moveTo(Square* destination) {
 
 	if (destination->isOccupied()) {
 		board->getScene()->removeItem(destination->getPiece());
-		if (isPromotion) {
-			destination->setPiece(pawn->getPromotionPiece(destination));
-		}
 	}
 
-	if (!isPromotion) {
+	if (isPromotion) {
+		destination->setPiece(pawn->getPromotedTo());
+	}
+	else {
 		square = destination;
 		destination->setPiece(this);
 		setPos(destination->getX() + 5, destination->getY() + 7);
 	}
+
 	board->clearEnPassants();
 	onMove();
 }

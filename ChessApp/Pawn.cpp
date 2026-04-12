@@ -1,5 +1,6 @@
 #include "Pawn.h"
 #include "PieceFactory.h"
+#include "PromotionType.h"
 #include "ChessBoard.h"
 #include "SquareIndex.h"
 
@@ -161,17 +162,52 @@ bool Pawn::isEnPassantLegal(Square* destination) {
 bool Pawn::checkIfPromotion(Square* destination) {
 	int rank = destination->getRank();
 	if (rank == 1 || rank == 8) {
+		drawPromotionSelector(destination);
 		return true;
 	}
 	return false;
 }
 
-Piece* Pawn::getPromotionPiece(Square* destination) {
+void Pawn::createPromotionPiece(PieceType type, Square* destination) {
 	board->getScene()->removeItem(this);
 
-	QString path = ":/assets/" + colorStrings.at(color) + "Queen.png";
-	Piece* piece = createPiece(PieceType::Queen, color, destination, path, board);
+	QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
+	Piece* piece = createPiece(type, color, destination, path, board);
 
 	board->drawPiece(piece);
-	return piece;
+
+	promotedTo = piece;
+	destination->setPiece(piece);
+}
+
+void Pawn::drawPromotionSelector(Square* destination) {
+	board->setPromotionMenuActive(true);
+
+	vector<PieceType> promotionTypes = { PieceType::Queen, PieceType::Rook,
+		PieceType::Bishop, PieceType::Knight };
+	int yPos = 180;
+	QColor lightGreen(5, 252, 104);
+	QColor darkGreen(4, 181, 75);
+
+	for (auto type : promotionTypes) {
+		auto rect = new QGraphicsRectItem(-100, yPos, 90, 90);
+		rect->setBrush(type == PieceType::Queen || type == PieceType::Bishop ? lightGreen : darkGreen);
+		rect->setPen(Qt::NoPen);
+		board->getScene()->addItem(rect);
+
+		auto promotionPieceType = new PromotionType(type, this, destination, board);
+		QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
+		
+		QPixmap pix(path);
+		promotionPieceType->setPixmap(pix);
+		promotionPieceType->setParentItem(rect);
+		promotionPieceType->setScale(80.0 / pix.width());
+		promotionPieceType->setPos(-95, yPos + 7);
+
+		yPos += 90;
+	}
+}
+
+Piece* Pawn::getPromotedTo() {
+	return promotedTo;
 }
