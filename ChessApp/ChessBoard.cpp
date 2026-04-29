@@ -2,7 +2,7 @@
 #include "pieceTypes.h"
 #include "PieceFactory.h"
 #include "enums.h"
-#include "Player.h"
+#include "PromotionType.h"
 #include<QGraphicsRectItem>
 #include<vector>
 
@@ -19,6 +19,7 @@ Square* ChessBoard::getBlackKingPos() { return blackKingPos; }
 void ChessBoard::setWhiteKingPos(Square* square) { whiteKingPos = square; }
 void ChessBoard::setBlackKingPos(Square* square) { blackKingPos = square; }
 
+vector<QGraphicsRectItem*>& ChessBoard::getPromotionMenu() { return promotionMenu; }
 bool ChessBoard::getPromotionMenuActive() { return promotionMenuActive; }
 void ChessBoard::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
 
@@ -152,5 +153,9 @@ void ChessBoard::switchTurn() {
 }
 
 void ChessBoard::removePromotionMenu() {
-
+	for (auto promotionType : promotionMenu) {
+		scene->removeItem(promotionType);
+		delete promotionType;
+	}
+	scene->setSceneRect(scene->itemsBoundingRect());
 }

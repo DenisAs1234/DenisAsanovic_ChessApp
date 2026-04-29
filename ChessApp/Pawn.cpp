@@ -194,10 +194,11 @@ void Pawn::drawPromotionSelector(Square* destination) {
 		rect->setBrush(type == PieceType::Queen || type == PieceType::Bishop ? lightGreen : darkGreen);
 		rect->setPen(Qt::NoPen);
 		board->getScene()->addItem(rect);
+		board->getPromotionMenu().push_back(rect);
 
 		auto promotionPieceType = new PromotionType(type, this, destination, board);
 		QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
-		
+
 		QPixmap pix(path);
 		promotionPieceType->setPixmap(pix);
 		promotionPieceType->setParentItem(rect);

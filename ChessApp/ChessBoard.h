@@ -5,6 +5,8 @@
 #include<QGraphicsScene>
 #include<QGraphicsPixmapItem>
 
+class PromotionType;
+
 class ChessBoard : public QGraphicsRectItem {
 	QGraphicsScene* scene;
 	vector<Square*> allSquares;
@@ -12,6 +14,7 @@ class ChessBoard : public QGraphicsRectItem {
 	PieceColor turnColor = PieceColor::White;
 	Square* whiteKingPos;
 	Square* blackKingPos;
+	vector<QGraphicsRectItem*> promotionMenu;
 	bool promotionMenuActive = false;
 public:
 	ChessBoard(QGraphicsScene* scene);
@@ -32,6 +35,7 @@ public:
 	void setWhiteKingPos(Square* square);
 	void setBlackKingPos(Square* square);
 
+	vector<QGraphicsRectItem*>& getPromotionMenu();
 	bool getPromotionMenuActive();
 	void setPromotionMenuActive(bool isActive);
 	void removePromotionMenu();
