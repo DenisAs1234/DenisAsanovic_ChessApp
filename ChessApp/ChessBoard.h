@@ -40,7 +40,9 @@ public:
 	void setPromotionMenuActive(bool isActive);
 	void removePromotionMenu();
 
+	bool hasLegalMoves(PieceColor turnColor);
 	bool isKingInCheck(PieceColor turnColor);
+	//bool isKingCheckmated(PieceColor turnColor);
 
 	void resetSelectedSquare();
 	void resetColorOfLegalMoves(vector<Square*> legalMoves);

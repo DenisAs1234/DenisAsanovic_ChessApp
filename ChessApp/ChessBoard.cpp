@@ -118,12 +118,42 @@ void ChessBoard::selectSquare(Square* square) {
 	}
 }
 
+bool ChessBoard::hasLegalMoves(PieceColor turnColor) {
+	for (Square* square : allSquares) {
+		if (!square->isOccupied()) continue;
+
+		Piece* piece = square->getPiece();
+		if (piece->getColor() != turnColor) continue;
+		
+		piece->findLegalMoves();
+		if (!piece->getLegalMoves().empty()) return true;
+	}
+	
+	if (turnColor == PieceColor::White) {
+		whiteKingPos->setBrush(isKingInCheck(turnColor) ? Qt::red : Qt::gray);
+		return false;
+	}
+	blackKingPos->setBrush(isKingInCheck(turnColor) ? Qt::red : Qt::gray);
+	return false;
+}
+
 bool ChessBoard::isKingInCheck(PieceColor turnColor) {
 	if (turnColor == PieceColor::White) {
 		return !whiteKingPos->isSafe(turnColor);
 	}
 	return !blackKingPos->isSafe(turnColor);
 }
+/*
+bool ChessBoard::isKingCheckmated(PieceColor turnColor) {
+	if (!isKingInCheck(turnColor)) return false;
+
+	Piece* piece = (turnColor == PieceColor::White) ? whiteKingPos->getPiece() : blackKingPos->getPiece();
+	King* king = dynamic_cast<King*>(piece);
+
+	king->findLegalMoves();
+	if (!king->getLegalMoves().empty()) return false;
+	if (hasLegalMoves(turnColor)) return false;
+}*/
 
 void ChessBoard::resetSelectedSquare() {
 	selectedSquare->resetColor();

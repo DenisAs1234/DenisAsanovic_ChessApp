@@ -95,9 +95,12 @@ void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     auto legalMoves = selectedPiece->getLegalMoves();
     if (find(legalMoves.begin(), legalMoves.end(), this) != legalMoves.end()) {
         selectedPiece->moveTo(this);
+
         board->resetSelectedSquare();
         board->resetColorOfLegalMoves(legalMoves);
+
         board->switchTurn();
+        board->hasLegalMoves(board->getTurnColor());
         return;
     }
 
