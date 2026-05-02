@@ -66,9 +66,13 @@ void King::onMove() {
 
 	if (color == PieceColor::White) {
 		board->setWhiteKingPos(square);
+		board->removeCastlingRight('K');
+		board->removeCastlingRight('Q');
 		return;
 	}
 	board->setBlackKingPos(square);
+	board->removeCastlingRight('k');
+	board->removeCastlingRight('q');
 }
 
 bool King::canCastle(CastlingType castlingType) {
@@ -121,4 +125,11 @@ void King::executeCastling(Square* destination) {
 		}
 	}
 
+	if (color == PieceColor::White) {
+		board->removeCastlingRight('K');
+		board->removeCastlingRight('Q');
+		return;
+	}
+	board->removeCastlingRight('k');
+	board->removeCastlingRight('q');
 }

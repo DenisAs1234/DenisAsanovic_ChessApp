@@ -11,4 +11,6 @@ public:
 	void findVisibleSquares() override;
 	bool getHasMoved();
 	void onMove() override;
+	void onCapture();
+	char getCorrectCastlingChar();
 };

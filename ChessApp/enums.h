@@ -47,3 +47,18 @@ inline const map<PieceColor, QString> colorStrings = {
     {PieceColor::White, "White"},
     {PieceColor::Black, "Black"}
 };
+
+inline const map<pair<PieceColor, PieceType>, char> fenCharacters = {
+    {{PieceColor::White, PieceType::Pawn}, 'P'},
+    {{PieceColor::White, PieceType::Knight}, 'N'},
+    {{PieceColor::White, PieceType::Bishop}, 'B'},
+    {{PieceColor::White, PieceType::Rook}, 'R'},
+    {{PieceColor::White, PieceType::Queen}, 'Q'},
+    {{PieceColor::White, PieceType::King}, 'K'},
+    {{PieceColor::Black, PieceType::Pawn}, 'p'},
+    {{PieceColor::Black, PieceType::Knight}, 'n'},
+    {{PieceColor::Black, PieceType::Bishop}, 'b'},
+    {{PieceColor::Black, PieceType::Rook}, 'r'},
+    {{PieceColor::Black, PieceType::Queen}, 'q'},
+    {{PieceColor::Black, PieceType::King}, 'k'},
+};

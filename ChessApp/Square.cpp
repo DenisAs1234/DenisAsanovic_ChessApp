@@ -101,6 +101,7 @@ void Square::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
         board->switchTurn();
         board->hasLegalMoves(board->getTurnColor());
+        board->generateFen();
         return;
     }
 

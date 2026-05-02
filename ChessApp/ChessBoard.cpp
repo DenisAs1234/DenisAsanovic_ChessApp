@@ -5,6 +5,7 @@
 #include "PromotionType.h"
 #include<QGraphicsRectItem>
 #include<vector>
+#include<QDebug>
 
 ChessBoard::ChessBoard(QGraphicsScene* scene)
 	: scene(scene), allSquares(64) {}
@@ -13,6 +14,7 @@ QGraphicsScene* ChessBoard::getScene() { return scene; }
 vector<Square*> ChessBoard::getAllSquares() { return allSquares; }
 Square* ChessBoard::getSelectedSquare() { return selectedSquare; }
 PieceColor ChessBoard::getTurnColor() { return turnColor; }
+QString ChessBoard::getCastlingRights() { return castlingRights; }
 
 Square* ChessBoard::getWhiteKingPos() { return whiteKingPos; }
 Square* ChessBoard::getBlackKingPos() { return blackKingPos; }
@@ -143,17 +145,56 @@ bool ChessBoard::isKingInCheck(PieceColor turnColor) {
 	}
 	return !blackKingPos->isSafe(turnColor);
 }
-/*
-bool ChessBoard::isKingCheckmated(PieceColor turnColor) {
-	if (!isKingInCheck(turnColor)) return false;
 
-	Piece* piece = (turnColor == PieceColor::White) ? whiteKingPos->getPiece() : blackKingPos->getPiece();
-	King* king = dynamic_cast<King*>(piece);
+void ChessBoard::generateFen() {
+	QString fen = "";
+	int file = 0;
+	int consecutiveEmpty = 0;
 
-	king->findLegalMoves();
-	if (!king->getLegalMoves().empty()) return false;
-	if (hasLegalMoves(turnColor)) return false;
-}*/
+	for (auto square : allSquares) {
+		if (file == 8) {
+			if (consecutiveEmpty > 0) {
+				fen += QString::number(consecutiveEmpty);
+			}
+			fen += '/';
+			file = 0;
+			consecutiveEmpty = 0;
+		}
+
+		if (!square->isOccupied()) {
+			consecutiveEmpty++;
+			file++;
+			continue;
+		}
+
+		if (consecutiveEmpty > 0) {
+			fen += QString::number(consecutiveEmpty);
+			consecutiveEmpty = 0;
+		}
+
+		Piece* piece = square->getPiece();
+		pair<PieceColor, PieceType> pieceKind = { piece->getColor(), piece->getType() };
+
+		fen += fenCharacters.at(pieceKind);
+		file++;
+	}
+
+	if (consecutiveEmpty > 0) {
+		fen += QString::number(consecutiveEmpty);
+	}
+
+	fen += (turnColor == PieceColor::White) ? " w " : " b ";
+	fen += castlingRights;
+
+	qDebug() << fen;
+}
+
+void ChessBoard::removeCastlingRight(char toRemove) {
+	castlingRights.remove(toRemove);
+	if (castlingRights.isEmpty()) {
+		castlingRights = "-";
+	}
+}
 
 void ChessBoard::resetSelectedSquare() {
 	selectedSquare->resetColor();

@@ -14,6 +14,7 @@ class ChessBoard : public QGraphicsRectItem {
 	PieceColor turnColor = PieceColor::White;
 	Square* whiteKingPos;
 	Square* blackKingPos;
+	QString castlingRights = "KQkq";
 	vector<QGraphicsRectItem*> promotionMenu;
 	bool promotionMenuActive = false;
 public:
@@ -29,6 +30,7 @@ public:
 	vector<Square*> getAllSquares();
 	Square* getSelectedSquare();
 	PieceColor getTurnColor();
+	QString getCastlingRights();
 
 	Square* getWhiteKingPos();
 	Square* getBlackKingPos();
@@ -42,7 +44,8 @@ public:
 
 	bool hasLegalMoves(PieceColor turnColor);
 	bool isKingInCheck(PieceColor turnColor);
-	//bool isKingCheckmated(PieceColor turnColor);
+	void generateFen();
+	void removeCastlingRight(char toRemove);
 
 	void resetSelectedSquare();
 	void resetColorOfLegalMoves(vector<Square*> legalMoves);

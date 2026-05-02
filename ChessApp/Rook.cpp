@@ -1,5 +1,6 @@
 #include "Rook.h"
 #include "Square.h"
+#include "ChessBoard.h"
 
 Rook::Rook(PieceColor color, Square* square, QString path, ChessBoard* board) :
 	Piece(PieceType::Rook, color, square, path, board) {}
@@ -28,4 +29,17 @@ bool Rook::getHasMoved() {
 void Rook::onMove() {
 	if (hasMoved) return;
 	hasMoved = true;
+	board->removeCastlingRight(getCorrectCastlingChar());
+}
+
+void Rook::onCapture() {
+	board->removeCastlingRight(getCorrectCastlingChar());
+}
+
+char Rook::getCorrectCastlingChar() {
+	int kingFile = board->getWhiteKingPos()->getFile();
+	if (square->getFile() < kingFile) {
+		return color == PieceColor::White ? 'Q' : 'q';
+	}
+	return color == PieceColor::White ? 'K' : 'k';
 }

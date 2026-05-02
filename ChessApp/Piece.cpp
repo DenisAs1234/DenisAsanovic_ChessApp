@@ -78,7 +78,13 @@ void Piece::moveTo(Square* destination) {
 	}
 
 	if (destination->isOccupied()) {
-		board->getScene()->removeItem(destination->getPiece());
+		Piece* capturedPiece = destination->getPiece();
+		Rook* rook = dynamic_cast<Rook*>(capturedPiece);
+		if (rook) {
+			rook->onCapture();
+		}
+
+		board->getScene()->removeItem(capturedPiece);
 	}
 
 	if (isPromotion) {
