@@ -1,11 +1,14 @@
 #include "Pawn.h"
 #include "PieceFactory.h"
-#include "PromotionType.h"
-#include "ChessBoard.h"
+#include "Square.h"
+#include "GameContext.h"
+#include "GameState.h"
+#include "PositionAnalyzer.h"
+#include "SpecialMoveHandler.h"
 #include "SquareIndex.h"
 
-Pawn::Pawn(PieceColor color, Square* square, QString path, ChessBoard* board) :
-	Piece(PieceType::Pawn, color, square, path, board) {}
+Pawn::Pawn(PieceColor color, Square* square, QString path, GameContext* context) :
+	Piece(PieceType::Pawn, color, square, path, context) {}
 
 void Pawn::findLegalMoves() {
 	legalMoves.clear();
@@ -20,11 +23,11 @@ void Pawn::findLegalMoves() {
 			? getSquareIndex(rank + forwardBy, file)
 			: getSquareIndex(rank - forwardBy, file);
 
-		Square* newSquare = board->getAllSquares()[index];
+		Square* newSquare = context->getState()->getAllSquares()[index];
 
 		if (newSquare->isOccupied()) break;
 
-		if (isMoveLegal(newSquare)) {
+		if (context->getAnalyzer()->isMoveLegal(this, newSquare)) {
 			legalMoves.push_back(newSquare);
 		}
 
@@ -36,10 +39,8 @@ void Pawn::findLegalMoves() {
 
 	getCaptures(rank, file);
 
-	for (auto& enPassantMove : enPassantMoves) {
-		if (isEnPassantLegal(enPassantMove)) {
-			legalMoves.push_back(enPassantMove);
-		}
+	if (enPassantMove && context->getSpecialMoves()->isEnPassantLegal(this, enPassantMove)) {
+		legalMoves.push_back(enPassantMove);
 	}
 }
 
@@ -50,7 +51,7 @@ void Pawn::getCaptures(int rank, int file) {
 		if (!newCapture->isOccupied()) continue;
 		if (newCapture->getPiece()->getColor() == this->color) continue;
 
-		if (isMoveLegal(newCapture)) {
+		if (context->getAnalyzer()->isMoveLegal(this, newCapture)) {
 			legalMoves.push_back(newCapture);
 		}
 	}
@@ -63,6 +64,7 @@ void Pawn::findVisibleSquares() {
 	int file = square->getFile();
 	vector<pair<int, int>> diagonalCaptures = { {1,1},{1,-1} };
 	int index;
+	GameState* state = context->getState();
 
 	for (auto& capture : diagonalCaptures) {
 		index = (color == PieceColor::White)
@@ -70,7 +72,7 @@ void Pawn::findVisibleSquares() {
 			: getSquareIndex(rank - capture.first, file + capture.second);
 
 		if (index == -1) continue;
-		Square* newCapture = board->getAllSquares()[index];
+		Square* newCapture = state->getAllSquares()[index];
 		visibleSquares.push_back(newCapture);
 	}
 }
@@ -82,10 +84,26 @@ void Pawn::onMove() {
 	int rank = square->getRank();
 
 	if (rank == 4 || rank == 5) {
-		checkForPawnsNextTo(this);
+		context->getSpecialMoves()->checkForPawnsNextTo(this);
 	}
 }
 
+Square* Pawn::getEnPassantMove() {
+	return enPassantMove;
+}
+
+void Pawn::setEnPassantMove(Square* enPassantSquare) {
+	enPassantMove = enPassantSquare;
+}
+
+Piece* Pawn::getPromotedTo() {
+	return promotedTo;
+}
+
+void Pawn::setPromotedTo(Piece* piece) {
+	promotedTo = piece;
+}
+/*
 void Pawn::checkForPawnsNextTo(Pawn* passingPawn) {
 	int rank = passingPawn->getSquare()->getRank();
 	int file = passingPawn->getSquare()->getFile();
@@ -94,7 +112,7 @@ void Pawn::checkForPawnsNextTo(Pawn* passingPawn) {
 		int index = getSquareIndex(rank, file + i);
 		if (index == -1) continue;
 
-		Square* nextToPassingPawn = board->getAllSquares()[index];
+		Square* nextToPassingPawn = state->getAllSquares()[index];
 
 		if (!nextToPassingPawn->isOccupied()) continue;
 
@@ -106,14 +124,11 @@ void Pawn::checkForPawnsNextTo(Pawn* passingPawn) {
 				? getSquareIndex(rank - 1, file)
 				: getSquareIndex(rank + 1, file);
 
-			Square* behindPassingPawn = board->getAllSquares()[index];
+			Square* behindPassingPawn = state->getAllSquares()[index];
 			pawn->getEnPassantMoves().push_back(behindPassingPawn);
+			state->addEnPassantSquare(behindPassingPawn);
 		}
 	}
-}
-
-vector<Square*>& Pawn::getEnPassantMoves() {
-	return enPassantMoves;
 }
 
 void Pawn::checkIfEnPassant(Square* destination) {
@@ -129,8 +144,8 @@ void Pawn::executeEnPassant(Square* destination) {
 		? getSquareIndex(destination->getRank() - 1, destination->getFile())
 		: getSquareIndex(destination->getRank() + 1, destination->getFile());
 
-	Square* enPassantPos = board->getAllSquares()[index];
-	board->getScene()->removeItem(enPassantPos->getPiece());
+	Square* enPassantPos = state->getAllSquares()[index];
+	logic->removePieceFromBoard(enPassantPos->getPiece());
 	enPassantPos->setPiece(nullptr);
 	enPassantMoves.clear();
 }
@@ -140,7 +155,7 @@ bool Pawn::isEnPassantLegal(Square* destination) {
 		? getSquareIndex(destination->getRank() - 1, destination->getFile())
 		: getSquareIndex(destination->getRank() + 1, destination->getFile());
 
-	Square* enPassantPos = board->getAllSquares()[index]; //polje na kojem se nalazi pješak u prolazu
+	Square* enPassantPos = state->getAllSquares()[index]; //polje na kojem se nalazi pješak u prolazu
 	Piece* onEnPassantPos = enPassantPos->getPiece(); //pješak u prolazu
 	enPassantPos->setPiece(nullptr); //micanje pješaka u prolazu s ploèe
 
@@ -149,7 +164,7 @@ bool Pawn::isEnPassantLegal(Square* destination) {
 	square = destination; //polje ovog pješaka postaje njegova destinacija (iza pješaka u prolazu)
 	destination->setPiece(this); //postavljanje ovog pješaka na destinaciju
 
-	bool isKingInCheck = board->isKingInCheck(color);
+	bool isKingInCheck = logic->isKingInCheck(color);
 
 	square = originalSquare; //polje ovog pješaka postaje originalno polje
 	enPassantPos->setPiece(onEnPassantPos); //vraæanje pješaka u prolazu na njegovo originalno polje
@@ -168,11 +183,11 @@ bool Pawn::checkIfPromotion(Square* destination) {
 	return false;
 }
 
-void Pawn::createPromotionPiece(PieceType type, Square* destination) {
-	board->getScene()->removeItem(this);
+void Pawn::executePromotion(PieceType type, Square* destination) {
+	logic->removePieceFromBoard(this);
 
 	QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
-	Piece* piece = createPiece(type, color, destination, path, board);
+	Piece* piece = createPiece(type, color, destination, path, state, logic);
 
 	board->drawPiece(piece);
 
@@ -207,8 +222,4 @@ void Pawn::drawPromotionSelector(Square* destination) {
 
 		yPos += 90;
 	}
-}
-
-Piece* Pawn::getPromotedTo() {
-	return promotedTo;
-}
+}*/

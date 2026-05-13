@@ -5,7 +5,7 @@
 #include<QGraphicsSceneMouseEvent>
 
 class Piece;
-class ChessBoard;
+class GameContext;
 
 class Square : public QGraphicsRectItem {
 	File file;
@@ -14,25 +14,26 @@ class Square : public QGraphicsRectItem {
 	qreal xPos;
 	qreal yPos;
 	Piece* piece;
-	ChessBoard* board;
+	GameContext* context;
 public:
-	Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos,
-		ChessBoard* board, QGraphicsItem* parent = nullptr);
+	Square(File file, int rank, SquareColor color, qreal xPos, qreal yPos, GameContext* context,
+		QGraphicsItem* parent = nullptr);
 
 	int getFile();
 	int getRank();
 	qreal getX();
 	qreal getY();
+	SquareColor getColor();
 
 	Piece* getPiece();
 	void setPiece(Piece* piece);
-
+	/*
 	void resetColor();
 	void highlightSelected();
-	void highlightMove();
+	void highlightMove();*/
 
 	bool isOccupied();
-	bool isSafe(PieceColor turnColor);
+	//bool isSafe();
 
 	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };

@@ -6,7 +6,7 @@
 #include<QGraphicsPixmapItem>
 
 class Square;
-class ChessBoard;
+class GameContext;
 
 class Piece : public QGraphicsPixmapItem {
 protected:
@@ -14,11 +14,11 @@ protected:
 	PieceColor color;
 	Square* square;
 	QString path;
-	ChessBoard* board;
+	GameContext* context;
 	vector<Square*> legalMoves;
 	vector<Square*> visibleSquares;
 public:
-	Piece(PieceType type, PieceColor color, Square* square, QString path, ChessBoard* board);
+	Piece(PieceType type, PieceColor color, Square* square, QString path, GameContext* context);
 
 	PieceType getType();
 	PieceColor getColor();
@@ -26,8 +26,8 @@ public:
 	void setSquare(Square* square);
 	QString getPath();
 
-	vector<Square*> getVisibleSquares();
 	vector<Square*> getLegalMoves();
+	vector<Square*> getVisibleSquares();
 
 	virtual void findLegalMoves() = 0;
 	virtual void findVisibleSquares() = 0;
@@ -35,5 +35,5 @@ public:
 
 	void moveTo(Square* square);
 	virtual void onMove() {};
-	bool isMoveLegal(Square* square);
+	//bool isMoveLegal(Square* square);
 };

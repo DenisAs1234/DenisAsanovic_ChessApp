@@ -5,7 +5,7 @@
 
 class Bishop : public Piece {
 public:
-	Bishop(PieceColor color, Square* square, QString path, ChessBoard* board);
+	Bishop(PieceColor color, Square* square, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 };

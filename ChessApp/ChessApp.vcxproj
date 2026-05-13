@@ -99,40 +99,51 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bishop.cpp" />
+    <ClCompile Include="BoardRenderer.cpp" />
+    <ClCompile Include="GameEndChecker.cpp" />
+    <ClCompile Include="GameContext.cpp" />
+    <ClCompile Include="GameState.cpp" />
     <ClCompile Include="King.cpp" />
     <ClCompile Include="Knight.cpp" />
+    <ClCompile Include="PieceFactory.cpp" />
+    <ClCompile Include="PositionAnalyzer.cpp" />
     <ClCompile Include="Pawn.cpp" />
     <ClCompile Include="Piece.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PromotionType.cpp" />
+    <ClCompile Include="PromotionOption.cpp" />
     <ClCompile Include="Queen.cpp" />
     <ClCompile Include="Rook.cpp" />
+    <ClCompile Include="SpecialMoveHandler.cpp" />
     <ClCompile Include="Square.cpp" />
     <QtRcc Include="MainWindow.qrc" />
     <QtRcc Include="resources.qrc" />
     <QtUic Include="MainWindow.ui" />
     <QtMoc Include="MainWindow.h" />
-    <ClCompile Include="ChessBoard.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bishop.h" />
-    <ClInclude Include="ChessBoard.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="GameEndChecker.h" />
+    <ClInclude Include="GameContext.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="King.h" />
     <ClInclude Include="Knight.h" />
     <ClInclude Include="Pawn.h" />
     <ClInclude Include="Piece.h" />
     <ClInclude Include="PieceFactory.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="PromotionType.h" />
+    <ClInclude Include="PromotionOption.h" />
     <ClInclude Include="Queen.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Rook.h" />
     <ClInclude Include="Square.h" />
     <ClInclude Include="pieceTypes.h" />
     <ClInclude Include="SquareIndex.h" />
+    <ClInclude Include="BoardRenderer.h" />
+    <ClInclude Include="PositionAnalyzer.h" />
+    <ClInclude Include="SpecialMoveHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChessApp.rc" />

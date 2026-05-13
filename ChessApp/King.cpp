@@ -1,10 +1,13 @@
 #include "King.h"
-#include "Rook.h"
-#include "ChessBoard.h"
+#include "GameContext.h"
+#include "GameState.h"
+#include "PositionAnalyzer.h"
+#include "SpecialMoveHandler.h"
+#include "Square.h"
 #include "SquareIndex.h"
 
-King::King(PieceColor color, Square* square, QString path, ChessBoard* board) :
-	Piece(PieceType::King, color, square, path, board) {}
+King::King(PieceColor color, Square* square, QString path, GameContext* context) :
+	Piece(PieceType::King, color, square, path, context) {}
 
 void King::findLegalMoves() {
 	legalMoves.clear();
@@ -16,25 +19,25 @@ void King::findLegalMoves() {
 	for (Square* newSquare : visibleSquares) {
 		if (newSquare->isOccupied() && newSquare->getPiece()->getColor() == this->color) continue;
 
-		if (isMoveLegal(newSquare)) {
+		if (context->getAnalyzer()->isMoveLegal(this, newSquare)) {
 			legalMoves.push_back(newSquare);
 		}
 	}
 
 	if (hasMoved) return;
-	if (!square->isSafe(color)) return;
+	if (context->getAnalyzer()->isKingInCheck(color)) return;
 
 	int rank = square->getRank();
 	int file = square->getFile();
 
-	if (canCastle(CastlingType::Short)) {
+	if (context->getSpecialMoves()->canCastle(this, CastlingType::Short)) {
 		int index = getSquareIndex(rank, 6);
-		Square* castlingSquare = board->getAllSquares()[index];
+		Square* castlingSquare = context->getState()->getAllSquares()[index];
 		legalMoves.push_back(castlingSquare);
 	}
-	if (canCastle(CastlingType::Long)) {
+	if (context->getSpecialMoves()->canCastle(this, CastlingType::Long)) {
 		int index = getSquareIndex(rank, 2);
-		Square* castlingSquare = board->getAllSquares()[index];
+		Square* castlingSquare = context->getState()->getAllSquares()[index];
 		legalMoves.push_back(castlingSquare);
 	}
 }
@@ -54,7 +57,7 @@ void King::findVisibleSquares() {
 		int index = getSquareIndex(newRank, newFile);
 		if (index == -1) continue;
 
-		Square* newSquare = board->getAllSquares()[index];
+		Square* newSquare = context->getState()->getAllSquares()[index];
 		visibleSquares.push_back(newSquare);
 	}
 }
@@ -64,17 +67,23 @@ void King::onMove() {
 		hasMoved = true;
 	}
 
+	GameState* state = context->getState();
+
 	if (color == PieceColor::White) {
-		board->setWhiteKingPos(square);
-		board->removeCastlingRight('K');
-		board->removeCastlingRight('Q');
+		state->setWhiteKingPos(square);
+		state->removeCastlingRight('K');
+		state->removeCastlingRight('Q');
 		return;
 	}
-	board->setBlackKingPos(square);
-	board->removeCastlingRight('k');
-	board->removeCastlingRight('q');
+	state->setBlackKingPos(square);
+	state->removeCastlingRight('k');
+	state->removeCastlingRight('q');
 }
 
+vector<pair<Square*, Rook*>>& King::getCastlingMoves() {
+	return castlingMoves;
+}
+/*
 bool King::canCastle(CastlingType castlingType) {
 	int rank = square->getRank();
 	int file = square->getFile();
@@ -132,4 +141,4 @@ void King::executeCastling(Square* destination) {
 	}
 	board->removeCastlingRight('k');
 	board->removeCastlingRight('q');
-}
+}*/

@@ -1,8 +1,10 @@
 #include "Queen.h"
 #include "Square.h"
+#include "GameContext.h"
+#include "PositionAnalyzer.h"
 
-Queen::Queen(PieceColor color, Square* square, QString path, ChessBoard* board) :
-	Piece(PieceType::Queen, color, square, path, board) {}
+Queen::Queen(PieceColor color, Square* square, QString path, GameContext* context) :
+	Piece(PieceType::Queen, color, square, path, context) {}
 
 void Queen::findLegalMoves() {
 	legalMoves.clear();
@@ -10,7 +12,7 @@ void Queen::findLegalMoves() {
 
 	for (Square* newSquare : visibleSquares) {
 		if (newSquare->isOccupied() && color == newSquare->getPiece()->getColor()) continue;
-		if (isMoveLegal(newSquare)) {
+		if (context->getAnalyzer()->isMoveLegal(this, newSquare)) {
 			legalMoves.push_back(newSquare);
 		}
 	}

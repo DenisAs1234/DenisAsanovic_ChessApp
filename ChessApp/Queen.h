@@ -5,7 +5,7 @@
 
 class Queen : public Piece {
 public:
-	Queen(PieceColor color, Square* square, QString path, ChessBoard* board);
+	Queen(PieceColor color, Square* square, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 };

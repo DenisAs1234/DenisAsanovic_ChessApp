@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsView>
-#include "ChessBoard.h"
+#include "BoardRenderer.h"
 
 class MainWindow : public QMainWindow
 {
@@ -13,7 +13,7 @@ public:
     ~MainWindow();
 
 private:
-    ChessBoard* board;
+    BoardRenderer* board;
     QGraphicsView* view;
 };
 

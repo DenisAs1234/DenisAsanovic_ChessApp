@@ -1,12 +1,14 @@
 #include "Piece.h"
 #include "Square.h"
 #include "pieceTypes.h"
-#include "ChessBoard.h"
+#include "GameContext.h"
+#include "GameState.h"
+#include "SpecialMoveHandler.h"
+#include "BoardRenderer.h"
 #include "enums.h"
 
-Piece::Piece(PieceType type, PieceColor color, Square* square, QString path, ChessBoard* board) : 
-	type(type), color(color), square(square), path(path), board(board) {
-}
+Piece::Piece(PieceType type, PieceColor color, Square* square, QString path, GameContext* context) :
+	type(type), color(color), square(square), path(path), context(context) {}
 
 PieceType Piece::getType() {
 	return type;
@@ -48,7 +50,7 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 			int index = getSquareIndex(newRank, newFile);
 			if (index == -1) break;
 
-			Square* newSquare = board->getAllSquares()[index];
+			Square* newSquare = context->getState()->getAllSquares()[index];
 			visibleSquares.push_back(newSquare);
 
 			if (newSquare->isOccupied()) {
@@ -64,27 +66,28 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 
 void Piece::moveTo(Square* destination) {
 	square->setPiece(nullptr);
+	auto specialMoves = context->getSpecialMoves();
 
 	Pawn* pawn = dynamic_cast<Pawn*>(this);
 	bool isPromotion = false;
 	if (pawn) {
-		pawn->checkIfEnPassant(destination);
-		isPromotion = pawn->checkIfPromotion(destination);
+		specialMoves->checkIfEnPassant(pawn, destination);
+		isPromotion = specialMoves->checkIfPromotion(pawn, destination);
 	}
 
 	King* king = dynamic_cast<King*>(this);
 	if (king) {
-		king->checkIfCastlingMove(destination);
+		specialMoves->checkIfCastlingMove(king, destination);
 	}
 
 	if (destination->isOccupied()) {
-		Piece* capturedPiece = destination->getPiece();
-		Rook* rook = dynamic_cast<Rook*>(capturedPiece);
+		Piece* toBeCaptured = destination->getPiece();
+		Rook* rook = dynamic_cast<Rook*>(toBeCaptured);
 		if (rook) {
 			rook->onCapture();
 		}
 
-		board->getScene()->removeItem(capturedPiece);
+		context->getBoard()->removePieceFromBoard(toBeCaptured);
 	}
 
 	if (isPromotion) {
@@ -96,10 +99,11 @@ void Piece::moveTo(Square* destination) {
 		setPos(destination->getX() + 5, destination->getY() + 7);
 	}
 
-	board->clearEnPassants();
+	specialMoves->clearEnPassants();
+	context->getState()->resetEnPassantSquare();
 	onMove();
 }
-
+/*
 bool Piece::isMoveLegal(Square* destination) {
 	square->setPiece(nullptr);
 	
@@ -108,14 +112,14 @@ bool Piece::isMoveLegal(Square* destination) {
 
 	King* king = dynamic_cast<King*>(this);
 	if (king) {
-		if (color == PieceColor::White) { board->setWhiteKingPos(destination); }
-		else { board->setBlackKingPos(destination); }
+		if (color == PieceColor::White) { state->setWhiteKingPos(destination); }
+		else { state->setBlackKingPos(destination); }
 	}
 	
 	Piece* onDestination = destination->getPiece();
 	destination->setPiece(this);
 
-	bool isKingInCheck = board->isKingInCheck(color);
+	bool isKingInCheck = logic->isKingInCheck(color);
 
 	square = originalSquare;
 	square->setPiece(this);
@@ -127,9 +131,9 @@ bool Piece::isMoveLegal(Square* destination) {
 	}
 
 	if (king) {
-		if (color == PieceColor::White) { board->setWhiteKingPos(originalSquare); }
-		else { board->setBlackKingPos(originalSquare); }
+		if (color == PieceColor::White) { state->setWhiteKingPos(originalSquare); }
+		else { state->setBlackKingPos(originalSquare); }
 	}
 
 	return isKingInCheck ? false : true;
-}
+}*/

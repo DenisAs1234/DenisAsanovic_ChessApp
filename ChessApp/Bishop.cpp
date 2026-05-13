@@ -1,8 +1,10 @@
 #include "Bishop.h"
 #include "Square.h"
+#include "GameContext.h"
+#include "PositionAnalyzer.h"
 
-Bishop::Bishop(PieceColor color, Square* square, QString path, ChessBoard* board) :
-	Piece(PieceType::Bishop, color, square, path, board) {}
+Bishop::Bishop(PieceColor color, Square* square, QString path, GameContext* context) :
+	Piece(PieceType::Bishop, color, square, path, context) {}
 
 void Bishop::findLegalMoves() {
 	legalMoves.clear();
@@ -10,7 +12,7 @@ void Bishop::findLegalMoves() {
 
 	for (Square* newSquare : visibleSquares) {
 		if (newSquare->isOccupied() && color == newSquare->getPiece()->getColor()) continue;
-		if (isMoveLegal(newSquare)) {
+		if (context->getAnalyzer()->isMoveLegal(this, newSquare)) {
 			legalMoves.push_back(newSquare);
 		}
 	}

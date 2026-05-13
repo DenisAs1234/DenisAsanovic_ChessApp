@@ -9,12 +9,13 @@ class King : public Piece {
 	bool hasMoved = false;
 	vector<pair<Square*, Rook*>> castlingMoves;
 public:
-	King(PieceColor color, Square* square, QString path, ChessBoard* board);
+	King(PieceColor color, Square* square, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 	void onMove() override;
-
+	vector<pair<Square*, Rook*>>& getCastlingMoves();
+	/*
 	bool canCastle(CastlingType castlingType);
 	void checkIfCastlingMove(Square* destination);
-	void executeCastling(Square* destination);
+	void executeCastling(Square* destination);*/
 };
