@@ -62,6 +62,8 @@ void GameContext::setupStartingPosition() {
 			}
 		}
 	}
+	state->generateFen();
+	gameEndings->updatePositionCounts();
 }
 /*
 bool GameContext::hasLegalMoves() {
@@ -127,6 +129,7 @@ void GameContext::handleSquareClick(Square* square) {
 
 		state->switchTurn();
 		state->generateFen();
+		gameEndings->updatePositionCounts();
 		gameEndings->ifGameIsOver();
 		return;
 	}

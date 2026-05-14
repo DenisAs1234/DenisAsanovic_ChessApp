@@ -5,6 +5,7 @@
 #include "GameState.h"
 #include "SpecialMoveHandler.h"
 #include "BoardRenderer.h"
+#include "GameEndChecker.h"
 #include "enums.h"
 
 Piece::Piece(PieceType type, PieceColor color, Square* square, QString path, GameContext* context) :
@@ -67,6 +68,7 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 void Piece::moveTo(Square* destination) {
 	square->setPiece(nullptr);
 	auto specialMoves = context->getSpecialMoves();
+	context->getGameEndings()->update50MoveCounter(this, destination);
 
 	Pawn* pawn = dynamic_cast<Pawn*>(this);
 	bool isPromotion = false;

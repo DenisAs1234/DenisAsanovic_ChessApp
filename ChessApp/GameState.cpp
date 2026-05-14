@@ -90,4 +90,9 @@ void GameState::generateFen() {
 	fen += castlingRights + ' ' + enPassantSquare;
 
 	qDebug() << fen;
+	currentFen = fen;
+}
+
+QString GameState::getCurrentFen() {
+	return currentFen;
 }

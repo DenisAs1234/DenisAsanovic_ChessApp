@@ -27,6 +27,9 @@ bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 // nakon neèeg drugog: Resignation, Timeout, Insufficient material vs Timeout, Agreement
 
 void GameEndChecker::ifGameIsOver() {
+	if (is50MoveRule()) return;
+	if (isRepetition()) return;
+
 	PieceColor turnColor = state->getTurnColor();
 	if (hasLegalMoves(turnColor)) return;
 	if (isCheckmate(turnColor)) return;
@@ -44,4 +47,32 @@ bool GameEndChecker::isCheckmate(PieceColor colorWithNoMoves) {
 
 void GameEndChecker::handleStalemate() {
 	board->showGameOverWindow("Draw by stalemate");
+}
+
+void GameEndChecker::update50MoveCounter(Piece* movingPiece, Square* destination) {
+	if (movingPiece->getType() == PieceType::Pawn || destination->isOccupied()) {
+		fiftyMoveRuleCounter = 0;
+		return;
+	}
+	fiftyMoveRuleCounter += 1;
+}
+
+bool GameEndChecker::is50MoveRule() {
+	if (fiftyMoveRuleCounter == 100) {
+		board->showGameOverWindow("Draw by 50-move rule");
+		return true;
+	}
+	return false;
+}
+
+void GameEndChecker::updatePositionCounts() {
+	positionCounts[state->getCurrentFen()] += 1;
+}
+
+bool GameEndChecker::isRepetition() {
+	if (positionCounts[state->getCurrentFen()] == 3) {
+		board->showGameOverWindow("Draw by repetition");
+		return true;
+	}
+	return false;
 }

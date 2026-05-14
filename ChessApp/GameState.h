@@ -14,6 +14,7 @@ class GameState {
 	Square* blackKingPos;
 	QString castlingRights = "KQkq";
 	QString enPassantSquare = "-";
+	QString currentFen;
 public:
 	GameState();
 
@@ -36,4 +37,5 @@ public:
 	void resetEnPassantSquare();
 
 	void generateFen();
+	QString getCurrentFen();
 };
