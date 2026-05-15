@@ -56,9 +56,10 @@ void GameContext::setupStartingPosition() {
 
 			for (file = 0; file < 8; file++) {
 				Square* square = allSquares[(rank - 1) * 8 + file];
-				Piece* piece = new Pawn(color, square, path, this);
+				Piece* piece = new Pawn(color, square, 1, path, this);
 				board->drawPiece(piece);
 				square->setPiece(piece);
+				state->addPiece(piece);
 			}
 		}
 	}

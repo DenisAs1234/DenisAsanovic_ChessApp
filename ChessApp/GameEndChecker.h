@@ -25,8 +25,11 @@ public:
 	void handleStalemate();
 
 	void update50MoveCounter(Piece* movingPiece, Square* destination);
-	bool is50MoveRule();
+	bool is50MoveRuleReached();
 
 	void updatePositionCounts();
 	bool isRepetition();
+
+	bool areSameColorBishops(Piece* whitePiece, Piece* blackPiece);
+	bool isMaterialInsufficient();
 };

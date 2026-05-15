@@ -3,8 +3,8 @@
 #include "GameContext.h"
 #include "PositionAnalyzer.h"
 
-Bishop::Bishop(PieceColor color, Square* square, QString path, GameContext* context) :
-	Piece(PieceType::Bishop, color, square, path, context) {}
+Bishop::Bishop(PieceColor color, Square* square, int value, QString path, GameContext* context) :
+	Piece(PieceType::Bishop, color, square, value, path, context) {}
 
 void Bishop::findLegalMoves() {
 	legalMoves.clear();

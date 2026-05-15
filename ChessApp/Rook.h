@@ -6,7 +6,7 @@
 class Rook : public Piece {
 	bool hasMoved = false;
 public:
-	Rook(PieceColor color, Square* square, QString path, GameContext* context);
+	Rook(PieceColor color, Square* square, int value, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 	bool getHasMoved();

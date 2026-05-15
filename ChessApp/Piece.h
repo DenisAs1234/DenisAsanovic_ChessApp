@@ -13,17 +13,19 @@ protected:
 	PieceType type;
 	PieceColor color;
 	Square* square;
+	int value;
 	QString path;
 	GameContext* context;
 	vector<Square*> legalMoves;
 	vector<Square*> visibleSquares;
 public:
-	Piece(PieceType type, PieceColor color, Square* square, QString path, GameContext* context);
+	Piece(PieceType type, PieceColor color, Square* square, int value, QString path, GameContext* context);
 
 	PieceType getType();
 	PieceColor getColor();
 	Square* getSquare();
 	void setSquare(Square* square);
+	int getValue();
 	QString getPath();
 
 	vector<Square*> getLegalMoves();

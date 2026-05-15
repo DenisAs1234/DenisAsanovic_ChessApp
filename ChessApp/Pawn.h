@@ -10,7 +10,7 @@ class Pawn : public Piece {
 	Square* enPassantMove = nullptr;
 	Piece* promotedTo;
 public:
-	Pawn(PieceColor color, Square* square, QString path, GameContext* context);
+	Pawn(PieceColor color, Square* square, int value, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 	void getCaptures(int rank, int file);

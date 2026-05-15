@@ -5,7 +5,7 @@
 
 class Knight : public Piece {
 public:
-	Knight(PieceColor color, Square* square, QString path, GameContext* context);
+	Knight(PieceColor color, Square* square, int value, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 };

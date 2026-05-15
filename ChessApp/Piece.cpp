@@ -8,8 +8,8 @@
 #include "GameEndChecker.h"
 #include "enums.h"
 
-Piece::Piece(PieceType type, PieceColor color, Square* square, QString path, GameContext* context) :
-	type(type), color(color), square(square), path(path), context(context) {}
+Piece::Piece(PieceType type, PieceColor color, Square* square, int value, QString path, GameContext* context) 
+	: type(type), color(color), square(square), value(value), path(path), context(context) {}
 
 PieceType Piece::getType() {
 	return type;
@@ -25,6 +25,10 @@ Square* Piece::getSquare() {
 
 void Piece::setSquare(Square* square) {
 	this->square = square;
+}
+
+int Piece::getValue() {
+	return value;
 }
 
 QString Piece::getPath() {
@@ -89,7 +93,8 @@ void Piece::moveTo(Square* destination) {
 			rook->onCapture();
 		}
 
-		context->getBoard()->removePieceFromBoard(toBeCaptured);
+		context->getBoard()->removeFromBoard(toBeCaptured);
+		context->getState()->removePiece(toBeCaptured);
 	}
 
 	if (isPromotion) {

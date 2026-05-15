@@ -51,7 +51,7 @@ void SpecialMoveHandler::executeEnPassant(Pawn* movingPawn, Square* destination)
 		: getSquareIndex(destination->getRank() + 1, destination->getFile());
 
 	Square* enPassantPos = state->getAllSquares()[index];
-	board->removePieceFromBoard(enPassantPos->getPiece());
+	board->removeFromBoard(enPassantPos->getPiece());
 	enPassantPos->setPiece(nullptr);
 	movingPawn->setEnPassantMove(nullptr);
 }
@@ -102,7 +102,7 @@ bool SpecialMoveHandler::checkIfPromotion(Pawn* promotingPawn, Square* destinati
 }
 
 void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, Square* destination) {
-	board->removePieceFromBoard(promotingPawn);
+	board->removeFromBoard(promotingPawn);
 
 	QString path = ":/assets/" + colorStrings.at(promotingPawn->getColor()) + pieceStrings.at(type) + ".png";
 	Piece* piece = factory->createPiece(type, promotingPawn->getColor(), destination, path);

@@ -48,7 +48,7 @@ void BoardRenderer::drawPiece(Piece* piece) {
 	scene->addItem(piece);
 }
 
-void BoardRenderer::removePieceFromBoard(Piece* piece) {
+void BoardRenderer::removeFromBoard(Piece* piece) {
 	scene->removeItem(piece);
 }
 /*

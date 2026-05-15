@@ -6,8 +6,8 @@
 #include "Square.h"
 #include "SquareIndex.h"
 
-King::King(PieceColor color, Square* square, QString path, GameContext* context) :
-	Piece(PieceType::King, color, square, path, context) {}
+King::King(PieceColor color, Square* square, int value, QString path, GameContext* context) :
+	Piece(PieceType::King, color, square, value, path, context) {}
 
 void King::findLegalMoves() {
 	legalMoves.clear();

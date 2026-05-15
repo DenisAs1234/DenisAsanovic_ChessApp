@@ -3,8 +3,8 @@
 #include "GameContext.h"
 #include "PositionAnalyzer.h"
 
-Queen::Queen(PieceColor color, Square* square, QString path, GameContext* context) :
-	Piece(PieceType::Queen, color, square, path, context) {}
+Queen::Queen(PieceColor color, Square* square, int value, QString path, GameContext* context) :
+	Piece(PieceType::Queen, color, square, value, path, context) {}
 
 void Queen::findLegalMoves() {
 	legalMoves.clear();

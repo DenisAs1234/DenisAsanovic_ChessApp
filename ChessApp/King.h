@@ -9,7 +9,7 @@ class King : public Piece {
 	bool hasMoved = false;
 	vector<pair<Square*, Rook*>> castlingMoves;
 public:
-	King(PieceColor color, Square* square, QString path, GameContext* context);
+	King(PieceColor color, Square* square, int value, QString path, GameContext* context);
 	void findLegalMoves() override;
 	void findVisibleSquares() override;
 	void onMove() override;

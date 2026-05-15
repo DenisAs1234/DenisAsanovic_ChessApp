@@ -7,8 +7,8 @@
 #include "SpecialMoveHandler.h"
 #include "SquareIndex.h"
 
-Pawn::Pawn(PieceColor color, Square* square, QString path, GameContext* context) :
-	Piece(PieceType::Pawn, color, square, path, context) {}
+Pawn::Pawn(PieceColor color, Square* square, int value, QString path, GameContext* context) :
+	Piece(PieceType::Pawn, color, square, value, path, context) {}
 
 void Pawn::findLegalMoves() {
 	legalMoves.clear();

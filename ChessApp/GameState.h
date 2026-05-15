@@ -10,6 +10,8 @@ class Piece;
 class GameState {
 	vector<Square*> allSquares;
 	PieceColor turnColor = PieceColor::White;
+	vector<Piece*> whitePieces;
+	vector<Piece*> blackPieces;
 	Square* whiteKingPos;
 	Square* blackKingPos;
 	QString castlingRights = "KQkq";
@@ -20,6 +22,11 @@ public:
 
 	vector<Square*>& getAllSquares();
 	void addSquare(int index, Square* square);
+
+	void addPiece(Piece* piece);
+	void removePiece(Piece* piece);
+	vector<Piece*>& getWhitePieces();
+	vector<Piece*>& getBlackPieces();
 
 	Square* getWhiteKingPos();
 	Square* getBlackKingPos();

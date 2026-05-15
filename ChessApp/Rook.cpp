@@ -4,8 +4,8 @@
 #include "PositionAnalyzer.h"
 #include "GameState.h"
 
-Rook::Rook(PieceColor color, Square* square, QString path, GameContext* context) :
-	Piece(PieceType::Rook, color, square, path, context) {}
+Rook::Rook(PieceColor color, Square* square, int value, QString path, GameContext* context) :
+	Piece(PieceType::Rook, color, square, value, path, context) {}
 
 void Rook::findLegalMoves() {
 	legalMoves.clear();

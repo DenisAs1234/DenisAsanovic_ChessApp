@@ -1,21 +1,26 @@
 #include "PieceFactory.h"
+#include "GameContext.h"
+#include "GameState.h"
 
 PieceFactory::PieceFactory(GameContext* context) : context(context) {};
 
 Piece* PieceFactory::createPiece(PieceType type, PieceColor color, Square* square, QString path) {
+	Piece* piece;
 	if (type == PieceType::Knight) {
-		return new Knight(color, square, path, context);
+		piece = new Knight(color, square, 3, path, context);
 	}
 	else if (type == PieceType::Bishop) {
-		return new Bishop(color, square, path, context);
+		piece = new Bishop(color, square, 3, path, context);
 	}
 	else if (type == PieceType::Rook) {
-		return new Rook(color, square, path, context);
+		piece = new Rook(color, square, 5, path, context);
 	}
 	else if (type == PieceType::Queen) {
-		return new Queen(color, square, path, context);
+		piece = new Queen(color, square, 9, path, context);
 	}
 	else {
-		return new King(color, square, path, context);
+		piece = new King(color, square, 0, path, context);
 	}
+	context->getState()->addPiece(piece);
+	return piece;
 }

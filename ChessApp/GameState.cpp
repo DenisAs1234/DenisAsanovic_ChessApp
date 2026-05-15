@@ -6,6 +6,9 @@ GameState::GameState() : allSquares(64) {};
 
 vector<Square*>& GameState::getAllSquares() { return allSquares; }
 
+vector<Piece*>& GameState::getWhitePieces() { return whitePieces; }
+vector<Piece*>& GameState::getBlackPieces() { return blackPieces; }
+
 Square* GameState::getWhiteKingPos() { return whiteKingPos; }
 Square* GameState::getBlackKingPos() { return blackKingPos; }
 
@@ -17,6 +20,24 @@ QString GameState::getCastlingRights() { return castlingRights; }
 
 void GameState::addSquare(int index, Square* square) {
 	allSquares[index] = square;
+}
+
+void GameState::addPiece(Piece* piece) {
+	if (piece->getType() == PieceType::King) return;
+
+	if (piece->getColor() == PieceColor::White) {
+		whitePieces.push_back(piece);
+		return;
+	}
+	blackPieces.push_back(piece);
+}
+
+void GameState::removePiece(Piece* piece) {
+	if (piece->getColor() == PieceColor::White) {
+		whitePieces.erase(find(whitePieces.begin(), whitePieces.end(), piece));
+		return;
+	}
+	blackPieces.erase(find(blackPieces.begin(), blackPieces.end(), piece));
 }
 
 void GameState::removeCastlingRight(char toRemove) {

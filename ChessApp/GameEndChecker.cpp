@@ -27,8 +27,9 @@ bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 // nakon neèeg drugog: Resignation, Timeout, Insufficient material vs Timeout, Agreement
 
 void GameEndChecker::ifGameIsOver() {
-	if (is50MoveRule()) return;
+	if (is50MoveRuleReached()) return;
 	if (isRepetition()) return;
+	if (isMaterialInsufficient()) return;
 
 	PieceColor turnColor = state->getTurnColor();
 	if (hasLegalMoves(turnColor)) return;
@@ -57,7 +58,7 @@ void GameEndChecker::update50MoveCounter(Piece* movingPiece, Square* destination
 	fiftyMoveRuleCounter += 1;
 }
 
-bool GameEndChecker::is50MoveRule() {
+bool GameEndChecker::is50MoveRuleReached() {
 	if (fiftyMoveRuleCounter == 100) {
 		board->showGameOverWindow("Draw by 50-move rule");
 		return true;
@@ -75,4 +76,31 @@ bool GameEndChecker::isRepetition() {
 		return true;
 	}
 	return false;
+}
+
+bool GameEndChecker::areSameColorBishops(Piece* whitePiece, Piece* blackPiece) {
+	if (whitePiece->getType() != PieceType::Bishop || blackPiece->getType() != PieceType::Bishop) {
+		return false;
+	}
+	if (whitePiece->getSquare()->getColor() != blackPiece->getSquare()->getColor()) {
+		return false;
+	}
+	return true;
+}
+
+bool GameEndChecker::isMaterialInsufficient() {
+	auto whitePieces = state->getWhitePieces();
+	auto blackPieces = state->getBlackPieces();
+
+	if (whitePieces.size() > 1 || blackPieces.size() > 1) return false;
+
+	if (!whitePieces.empty() && whitePieces.at(0)->getValue() != 3) return false;
+	if (!blackPieces.empty() && blackPieces.at(0)->getValue() != 3) return false;
+
+	if (!whitePieces.empty() && !blackPieces.empty()) {
+		if (!areSameColorBishops(whitePieces.at(0), blackPieces.at(0))) return false;
+	}
+
+	board->showGameOverWindow("Draw by insufficient material");
+	return true;
 }
