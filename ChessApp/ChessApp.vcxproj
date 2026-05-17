@@ -100,6 +100,7 @@
   <ItemGroup>
     <ClCompile Include="Bishop.cpp" />
     <ClCompile Include="BoardRenderer.cpp" />
+    <ClCompile Include="GameButton.cpp" />
     <ClCompile Include="GameEndChecker.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameState.cpp" />
@@ -125,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="Bishop.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="GameButton.h" />
     <ClInclude Include="GameEndChecker.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameState.h" />

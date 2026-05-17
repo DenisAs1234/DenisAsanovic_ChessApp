@@ -6,6 +6,7 @@
 #include "GameContext.h"
 #include "GameState.h"
 #include "SquareIndex.h"
+#include "GameButton.h"
 
 BoardRenderer::BoardRenderer(QGraphicsScene* scene) : scene(scene) {};
 
@@ -200,4 +201,42 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 	result->setPos(x + (width - resultRect.width()) / 2, y + 120);
 
 	scene->addItem(result);
+}
+
+void BoardRenderer::drawButtons() {
+	GameButton* whiteDraw =
+		new GameButton(ButtonAction::OfferDraw,
+			"Offer draw",
+			context->getWhitePlayer(),
+			context,
+			780, 500);
+
+	scene->addItem(whiteDraw);
+
+	GameButton* whiteResign =
+		new GameButton(ButtonAction::Resign,
+			"White Resign",
+			context->getWhitePlayer(),
+			context,
+			780, 570);
+
+	scene->addItem(whiteResign);
+
+	GameButton* blackDraw =
+		new GameButton(ButtonAction::OfferDraw,
+			"Offer draw",
+			context->getBlackPlayer(),
+			context,
+			780, 100);
+
+	scene->addItem(blackDraw);
+
+	GameButton* blackResign =
+		new GameButton(ButtonAction::Resign,
+			"Black Resign",
+			context->getBlackPlayer(),
+			context,
+			780, 170);
+
+	scene->addItem(blackResign);
 }

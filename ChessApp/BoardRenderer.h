@@ -27,6 +27,7 @@ public:
 	void drawBoard();
 	void drawPiece(Piece* piece);
 	void removeFromBoard(Piece* piece);
+	void drawButtons();
 
 	void resetColor(Square* square);
 	void highlightSelected(Square* square);

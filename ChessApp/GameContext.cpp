@@ -10,15 +10,22 @@
 #include<QBrush>
 
 GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
-	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) : 
+	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) :
+	whitePlayer(PieceColor::White, "White"), blackPlayer(PieceColor::Black, "Black"),
 	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {};
 
+Player GameContext::getWhitePlayer() { return whitePlayer; }
+Player GameContext::getBlackPlayer() { return blackPlayer; }
+
 Square* GameContext::getSelectedSquare() { return selectedSquare; }
+
 GameState* GameContext::getState() { return state; }
 BoardRenderer* GameContext::getBoard() { return board; }
+
 PositionAnalyzer* GameContext::getAnalyzer() { return analyzer; }
 SpecialMoveHandler* GameContext::getSpecialMoves() { return specialMoves; }
 GameEndChecker* GameContext::getGameEndings() { return gameEndings; }
+
 void GameContext::setFactory(PieceFactory* factory) { this->factory = factory; }
 
 void GameContext::setupStartingPosition() {
@@ -66,23 +73,7 @@ void GameContext::setupStartingPosition() {
 	state->generateFen();
 	gameEndings->updatePositionCounts();
 }
-/*
-bool GameContext::hasLegalMoves() {
-	PieceColor turnColor = state->getTurnColor();
 
-	for (Square* square : state->getAllSquares()) {
-		if (!square->isOccupied()) continue;
-
-		Piece* piece = square->getPiece();
-		if (piece->getColor() != turnColor) continue;
-
-		piece->findLegalMoves();
-		if (!piece->getLegalMoves().empty()) return true;
-	}
-
-	return false;
-}
-*/
 void GameContext::selectSquare(Square* square) {
 	if (selectedSquare) {
 		auto legalMoves = selectedSquare->getPiece()->getLegalMoves();
@@ -143,4 +134,20 @@ void GameContext::handleSquareClick(Square* square) {
 		selectSquare(square);
 		return;
 	}
+}
+
+void GameContext::offerDraw(Player player) {
+
+}
+
+void GameContext::acceptDraw() {
+	board->showGameOverWindow("Draw by agreement");
+}
+
+void GameContext::resign(Player loser) {
+	PieceColor winner = (loser.getColor() == PieceColor::White)
+		? PieceColor::Black
+		: PieceColor::White;
+
+	board->showGameOverWindow(colorStrings.at(winner) + " wins by resignation");
 }

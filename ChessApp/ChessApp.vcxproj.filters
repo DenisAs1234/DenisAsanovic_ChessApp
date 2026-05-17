@@ -85,9 +85,6 @@
     <ClCompile Include="King.cpp">
       <Filter>Source Files\Pieces</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BoardRenderer.cpp">
       <Filter>Source Files\Board</Filter>
     </ClCompile>
@@ -121,6 +118,12 @@
     <ClCompile Include="PieceFactory.cpp">
       <Filter>Source Files\Pieces</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="GameButton.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -148,9 +151,6 @@
       <Filter>Header Files\Pieces</Filter>
     </ClInclude>
     <ClInclude Include="enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameEndChecker.h">
@@ -185,6 +185,12 @@
     </ClInclude>
     <ClInclude Include="BoardRenderer.h">
       <Filter>Header Files\Board</Filter>
+    </ClInclude>
+    <ClInclude Include="GameButton.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\State</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

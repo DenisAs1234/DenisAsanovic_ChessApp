@@ -1,10 +1,13 @@
 #pragma once
+
 #include "enums.h"
 
 class Player {
 	PieceColor color;
-	bool isYourTurn = false;
+	QString nickname;
 public:
-	Player(PieceColor color);
-	void setIsYourTurn(bool isYourTurn);
+	Player(PieceColor color, QString nickname);
+
+	PieceColor getColor();
+	QString getNickname();
 };

@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget* parent)
     setCentralWidget(view);
 
     board->drawBoard();
+    board->drawButtons();
     context->setupStartingPosition();
 }
 

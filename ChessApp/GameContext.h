@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "Player.h"
 
 class GameState;
 class BoardRenderer;
@@ -11,6 +12,8 @@ class Square;
 class PieceFactory;
 
 class GameContext {
+	Player whitePlayer;
+	Player blackPlayer;
 	Square* selectedSquare;
 	GameState* state;
 	BoardRenderer* board;
@@ -24,17 +27,24 @@ public:
 
 	void setFactory(PieceFactory* factory);
 
-	Square* getSelectedSquare();
+	Player getWhitePlayer();
+	Player getBlackPlayer();
+
 	GameState* getState();
 	BoardRenderer* getBoard();
+
 	PositionAnalyzer* getAnalyzer();
 	SpecialMoveHandler* getSpecialMoves();
 	GameEndChecker* getGameEndings();
 
 	void setupStartingPosition();
-	//bool hasLegalMoves();
 
+	Square* getSelectedSquare();
 	void selectSquare(Square* square);
 	void resetSelectedSquare();
 	void handleSquareClick(Square* square);
+
+	void offerDraw(Player player);
+	void acceptDraw();
+	void resign(Player player);
 };

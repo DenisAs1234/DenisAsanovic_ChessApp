@@ -1,5 +1,7 @@
 #include "Player.h"
 
-Player::Player(PieceColor color) : color(color) {};
+Player::Player(PieceColor color, QString nickname) : color(color), nickname(nickname) {};
 
-void Player::setIsYourTurn(bool isYourTurn) { this->isYourTurn = isYourTurn; }
+PieceColor Player::getColor() { return color; }
+
+QString Player::getNickname() { return nickname; }
