@@ -9,6 +9,7 @@ class Piece;
 
 class GameState {
 	vector<Square*> allSquares;
+	int moveCount = 1;
 	PieceColor turnColor = PieceColor::White;
 	vector<Piece*> whitePieces;
 	vector<Piece*> blackPieces;
@@ -39,6 +40,9 @@ public:
 
 	PieceColor getTurnColor();
 	void switchTurn();
+
+	int getMoveCount();
+	void updateMoveCount();
 
 	void addEnPassantSquare(Square* square);
 	void resetEnPassantSquare();

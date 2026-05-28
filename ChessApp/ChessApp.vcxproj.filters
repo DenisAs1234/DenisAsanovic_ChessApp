@@ -162,9 +162,6 @@
     <ClInclude Include="Square.h">
       <Filter>Header Files\Board</Filter>
     </ClInclude>
-    <ClInclude Include="GameContext.h">
-      <Filter>Header Files\Logic</Filter>
-    </ClInclude>
     <ClInclude Include="Piece.h">
       <Filter>Header Files\Pieces</Filter>
     </ClInclude>
@@ -201,6 +198,9 @@
   <ItemGroup>
     <QtMoc Include="MainWindow.h">
       <Filter>Header Files\UI</Filter>
+    </QtMoc>
+    <QtMoc Include="GameContext.h">
+      <Filter>Header Files\Logic</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

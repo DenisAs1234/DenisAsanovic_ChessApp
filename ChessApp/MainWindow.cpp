@@ -7,6 +7,8 @@
 #include "GameEndChecker.h"
 #include "PieceFactory.h"
 #include <QGraphicsView>
+#include <QTcpSocket>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -31,7 +33,27 @@ MainWindow::MainWindow(QWidget* parent)
 
     board->drawBoard();
     board->drawButtons();
+    board->drawClocks();
     context->setupStartingPosition();
+
+    QTcpSocket* socket = new QTcpSocket(this);
+
+    socket->connectToHost("127.0.0.1", 12345);
+
+    connect(socket, &QTcpSocket::connected, this, [=]()
+        {
+            qDebug() << "Connected to ChessServer!";
+
+            QString request =
+                "Denis|Standard|5+0|1500";
+
+            socket->write(request.toUtf8());
+        });
+
+    connect(socket, &QTcpSocket::readyRead, this, [=]()
+        {
+            qDebug() << socket->readAll();
+        });
 }
 
 MainWindow::~MainWindow()

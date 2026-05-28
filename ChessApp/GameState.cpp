@@ -15,6 +15,8 @@ Square* GameState::getBlackKingPos() { return blackKingPos; }
 void GameState::setWhiteKingPos(Square* square) { whiteKingPos = square; }
 void GameState::setBlackKingPos(Square* square) { blackKingPos = square; }
 
+int GameState::getMoveCount() { return moveCount; }
+
 PieceColor GameState::getTurnColor() { return turnColor; }
 QString GameState::getCastlingRights() { return castlingRights; }
 
@@ -68,6 +70,12 @@ void GameState::resetEnPassantSquare() {
 
 void GameState::switchTurn() {
 	turnColor = (turnColor == PieceColor::White) ? PieceColor::Black : PieceColor::White;
+}
+
+void GameState::updateMoveCount() {
+	if (turnColor == PieceColor::White) {
+		moveCount += 1;
+	}
 }
 
 void GameState::generateFen() {

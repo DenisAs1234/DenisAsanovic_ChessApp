@@ -2,6 +2,9 @@
 
 #include "enums.h"
 #include "Player.h"
+#include <QTimer>
+#include <QElapsedTimer>
+#include <QObject>
 
 class GameState;
 class BoardRenderer;
@@ -11,7 +14,8 @@ class GameEndChecker;
 class Square;
 class PieceFactory;
 
-class GameContext {
+class GameContext : public QObject {
+	Q_OBJECT
 	Player whitePlayer;
 	Player blackPlayer;
 	Square* selectedSquare;
@@ -21,6 +25,9 @@ class GameContext {
 	SpecialMoveHandler* specialMoves;
 	GameEndChecker* gameEndings;
 	PieceFactory* factory;
+	bool drawOfferActive = false;
+	QTimer* clockTimer;
+	QElapsedTimer elapsedTimer;
 public:
 	GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 		SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings);
@@ -29,6 +36,7 @@ public:
 
 	Player getWhitePlayer();
 	Player getBlackPlayer();
+	Player& getTurnPlayer();
 
 	GameState* getState();
 	BoardRenderer* getBoard();
@@ -45,6 +53,7 @@ public:
 	void handleSquareClick(Square* square);
 
 	void offerDraw(Player player);
-	void acceptDraw();
 	void resign(Player player);
+
+	void updateClock();
 };

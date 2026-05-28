@@ -7,6 +7,7 @@
 #include "GameState.h"
 #include "SquareIndex.h"
 #include "GameButton.h"
+#include "Player.h"
 
 BoardRenderer::BoardRenderer(QGraphicsScene* scene) : scene(scene) {};
 
@@ -52,32 +53,6 @@ void BoardRenderer::drawPiece(Piece* piece) {
 void BoardRenderer::removeFromBoard(Piece* piece) {
 	scene->removeItem(piece);
 }
-/*
-void BoardRenderer::selectSquare(Square* square) {
-	if (selectedSquare) {
-		auto legalMoves = selectedSquare->getPiece()->getLegalMoves();
-		resetSelectedSquare();
-		resetColorOfLegalMoves(legalMoves);
-	}
-
-	if (square->isOccupied()) {
-		selectedSquare = square;
-
-		Piece* piece = square->getPiece();
-		piece->findLegalMoves();
-		auto legalMoves = piece->getLegalMoves();
-
-		selectedSquare->highlightSelected();
-		for (Square* legalMove : legalMoves) {
-			legalMove->highlightMove();
-		}
-	}
-}
-
-void BoardRenderer::resetSelectedSquare() {
-	selectedSquare->resetColor();
-	selectedSquare = nullptr;
-}*/
 
 void BoardRenderer::resetColor(Square* square) {
 	QColor darkSquare(194, 106, 62);
@@ -86,15 +61,21 @@ void BoardRenderer::resetColor(Square* square) {
 }
 
 void BoardRenderer::highlightSelected(Square* square) {
-	square->setBrush(QBrush(square->getColor() == SquareColor::dark ? QColor(252, 186, 3) : QColor(250, 209, 5)));
+	square->setBrush(QBrush(square->getColor() == SquareColor::dark 
+		? QColor(252, 186, 3) 
+		: QColor(250, 209, 5)));
 }
 
 void BoardRenderer::highlightMove(Square* square) {
 	if (!square->isOccupied()) {
-		square->setBrush(QBrush(square->getColor() == SquareColor::dark ? QColor(30, 156, 52) : QColor(52, 235, 85)));
+		square->setBrush(QBrush(square->getColor() == SquareColor::dark 
+			? QColor(30, 156, 52) 
+			: QColor(52, 235, 85)));
 		return;
 	}
-	square->setBrush(QBrush(square->getColor() == SquareColor::dark ? QColor(39, 117, 242) : QColor(66, 139, 255)));
+	square->setBrush(QBrush(square->getColor() == SquareColor::dark 
+		? QColor(39, 117, 242) 
+		: QColor(66, 139, 255)));
 }
 
 void BoardRenderer::resetColorOfLegalMoves(vector<Square*> legalMoves) {
@@ -239,4 +220,71 @@ void BoardRenderer::drawButtons() {
 			780, 170);
 
 	scene->addItem(blackResign);
+}
+
+void BoardRenderer::showDrawOfferMessage(PieceColor offerer) {
+	int moveCount = context->getState()->getMoveCount();
+	QString message = QString("Move %1: %2 offered a draw.")
+		.arg(QString::number(moveCount))
+		.arg(colorStrings.at(offerer));
+
+	drawOfferMsg = new QGraphicsTextItem(message);
+	QFont drawOfferFont;
+
+	drawOfferMsg->setDefaultTextColor(Qt::black);
+	drawOfferFont.setPointSize(14);
+	drawOfferMsg->setFont(drawOfferFont);
+	drawOfferMsg->setPos(780, 335);
+	
+	scene->addItem(drawOfferMsg);
+}
+
+void BoardRenderer::removeDrawOfferMessage() {
+	if (drawOfferMsg) {
+		scene->removeItem(drawOfferMsg);
+		delete drawOfferMsg;
+		drawOfferMsg = nullptr;
+	}
+}
+
+void BoardRenderer::drawClocks() {
+	QFont clockFont("Arial", 20, QFont::Bold);
+
+	whiteClock = new QGraphicsTextItem("0:25");
+	blackClock = new QGraphicsTextItem("0:25");
+
+	whiteClock->setFont(clockFont);
+	blackClock->setFont(clockFont);
+
+	whiteClock->setDefaultTextColor(Qt::black);
+	blackClock->setDefaultTextColor(Qt::black);
+
+	whiteClock->setPos(780, 440);
+	blackClock->setPos(780, 240);
+
+	scene->addItem(whiteClock);
+	scene->addItem(blackClock);
+}
+
+void BoardRenderer::updateClockDisplay(Player& player) {
+	qint64 ms = player.getRemainingTime();
+	int seconds = ms / 1000;
+
+	QString text = QString("%1:%2")
+		.arg(seconds / 60, 1, 10)
+		.arg(seconds % 60, 2, 10, QChar('0'));
+	
+	if (player.getRemainingTime() < 20000) {
+		text += QString(".%1").arg(ms / 100 % 10);
+	}
+
+	if (text == lastDisplayedTime) return;
+
+	lastDisplayedTime = text;
+
+	if (player.getColor() == PieceColor::White) {
+		whiteClock->setPlainText(text);
+		return;
+	}
+	blackClock->setPlainText(text);
 }

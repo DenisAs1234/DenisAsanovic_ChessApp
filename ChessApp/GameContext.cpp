@@ -7,15 +7,27 @@
 #include "Piece.h"
 #include "Square.h"
 #include "PieceFactory.h"
-#include<QBrush>
+#include <QBrush>
 
 GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) :
-	whitePlayer(PieceColor::White, "White"), blackPlayer(PieceColor::Black, "Black"),
-	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {};
+	whitePlayer(PieceColor::White, "White", 25000), blackPlayer(PieceColor::Black, "Black", 25000),
+	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {
+
+	clockTimer = new QTimer();
+	connect(clockTimer, &QTimer::timeout, this, &GameContext::updateClock);
+	clockTimer->start(50);
+	elapsedTimer.start();
+};
 
 Player GameContext::getWhitePlayer() { return whitePlayer; }
 Player GameContext::getBlackPlayer() { return blackPlayer; }
+
+Player& GameContext::getTurnPlayer() {
+	return (state->getTurnColor() == PieceColor::White)
+		? whitePlayer
+		: blackPlayer;
+}
 
 Square* GameContext::getSelectedSquare() { return selectedSquare; }
 
@@ -121,7 +133,12 @@ void GameContext::handleSquareClick(Square* square) {
 
 		state->switchTurn();
 		state->generateFen();
+		state->updateMoveCount();
 		gameEndings->updatePositionCounts();
+
+		drawOfferActive = false;
+		board->removeDrawOfferMessage();
+
 		gameEndings->ifGameIsOver();
 		return;
 	}
@@ -136,12 +153,16 @@ void GameContext::handleSquareClick(Square* square) {
 	}
 }
 
-void GameContext::offerDraw(Player player) {
+void GameContext::offerDraw(Player offerer) {
+	if (!drawOfferActive) {
+		drawOfferActive = true;
+		board->showDrawOfferMessage(offerer.getColor());
+		return;
+	}
 
-}
-
-void GameContext::acceptDraw() {
-	board->showGameOverWindow("Draw by agreement");
+	if (drawOfferActive) {
+		board->showGameOverWindow("Draw by agreement");
+	}
 }
 
 void GameContext::resign(Player loser) {
@@ -150,4 +171,22 @@ void GameContext::resign(Player loser) {
 		: PieceColor::White;
 
 	board->showGameOverWindow(colorStrings.at(winner) + " wins by resignation");
+}
+
+void GameContext::updateClock() {
+	if (!board->getBoardActive()) return;
+	
+	qint64 elapsedMs = elapsedTimer.restart();
+	Player& turnPlayer = getTurnPlayer();
+
+	turnPlayer.setRemainingTime(turnPlayer.getRemainingTime() - elapsedMs);
+	//qDebug() << turnPlayer.getRemainingTime();
+
+	if (turnPlayer.getRemainingTime() <= 0) {
+		auto winner = turnPlayer.getColor() == PieceColor::White ?
+			PieceColor::Black : PieceColor::White;
+		board->showGameOverWindow(colorStrings.at(winner) + " wins by timeout");
+	}
+
+	board->updateClockDisplay(turnPlayer);
 }

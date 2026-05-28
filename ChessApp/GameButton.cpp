@@ -26,7 +26,7 @@ void GameButton::applyStyle(ButtonAction action) {
 	QColor fill;
 	QColor border;
 
-	if (action == ButtonAction::OfferDraw || action == ButtonAction::AcceptDraw) {
+	if (action == ButtonAction::OfferDraw /* || action == ButtonAction::AcceptDraw */) {
 		fill = QColor(180, 220, 255);
 		border = QColor(0, 120, 255);
 	}
@@ -47,11 +47,11 @@ void GameButton::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	case ButtonAction::OfferDraw: 
 		context->offerDraw(player);
 		break;
-
+	/*
 	case ButtonAction::AcceptDraw: 
 		context->acceptDraw();
 		break;
-
+		*/
 	case ButtonAction::Resign:
 		context->resign(player);
 		break;
