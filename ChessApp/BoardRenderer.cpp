@@ -178,7 +178,6 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 	result->setZValue(3);
 
 	QRectF resultRect = result->boundingRect();
-
 	result->setPos(x + (width - resultRect.width()) / 2, y + 120);
 
 	scene->addItem(result);

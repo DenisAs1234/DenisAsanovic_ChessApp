@@ -103,6 +103,7 @@
     <ClCompile Include="GameButton.cpp" />
     <ClCompile Include="GameEndChecker.cpp" />
     <ClCompile Include="GameContext.cpp" />
+    <ClCompile Include="GamePage.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="King.cpp" />
     <ClCompile Include="Knight.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="GameButton.h" />
     <ClInclude Include="GameEndChecker.h" />
     <QtMoc Include="GameContext.h" />
+    <QtMoc Include="GamePage.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="King.h" />
     <ClInclude Include="Knight.h" />

@@ -12,5 +12,6 @@
         <file alias="BlackRook.png">assets/pieces/BlackRook.png</file>
         <file alias="BlackQueen.png">assets/pieces/BlackQueen.png</file>
         <file alias="BlackKing.png">assets/pieces/BlackKing.png</file>
+        <file alias="arrowDown.jpg">assets/arrow-down.jpg</file>
     </qresource>
 </RCC>

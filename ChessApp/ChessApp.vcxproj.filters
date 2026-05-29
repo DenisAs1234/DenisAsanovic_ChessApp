@@ -124,6 +124,9 @@
     <ClCompile Include="GameButton.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="GamePage.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -174,12 +177,6 @@
     <ClInclude Include="SquareIndex.h">
       <Filter>Header Files\Board</Filter>
     </ClInclude>
-    <ClInclude Include="PositionAnalyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpecialMoveHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BoardRenderer.h">
       <Filter>Header Files\Board</Filter>
     </ClInclude>
@@ -188,6 +185,12 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PositionAnalyzer.h">
+      <Filter>Header Files\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecialMoveHandler.h">
+      <Filter>Header Files\Logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +204,9 @@
     </QtMoc>
     <QtMoc Include="GameContext.h">
       <Filter>Header Files\Logic</Filter>
+    </QtMoc>
+    <QtMoc Include="GamePage.h">
+      <Filter>Header Files\UI</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

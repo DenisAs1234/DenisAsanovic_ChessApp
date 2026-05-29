@@ -55,5 +55,7 @@ public:
 	void offerDraw(Player player);
 	void resign(Player player);
 
+	void startClock();
 	void updateClock();
+	void stopClock();
 };

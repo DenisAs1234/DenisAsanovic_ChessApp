@@ -3,12 +3,14 @@
 #include "GameState.h"
 #include "BoardRenderer.h"
 #include "PositionAnalyzer.h"
+#include "GameContext.h"
 #include "Square.h"
 #include "Piece.h"
 
-GameEndChecker::GameEndChecker(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) :
-	state(state), board(board), analyzer(analyzer) {
-}
+GameEndChecker::GameEndChecker(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) : 
+	state(state), board(board), analyzer(analyzer) {}
+
+void GameEndChecker::setContext(GameContext* context) { this->context = context; }
 
 bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 	for (Square* square : state->getAllSquares()) {
@@ -22,9 +24,6 @@ bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 	}
 	return false;
 }
-
-// nakon poteza: Checkmate, Stalemate, 50 move rule, Repetition, Insufficient material
-// nakon neèeg drugog: Resignation, Timeout, Insufficient material vs Timeout, Agreement
 
 void GameEndChecker::ifGameIsOver() {
 	if (is50MoveRuleReached()) return;
@@ -40,14 +39,14 @@ void GameEndChecker::ifGameIsOver() {
 bool GameEndChecker::isCheckmate(PieceColor colorWithNoMoves) {
 	if (analyzer->isKingInCheck(colorWithNoMoves)) {
 		PieceColor winner = colorWithNoMoves == PieceColor::White ? PieceColor::Black : PieceColor::White;
-		board->showGameOverWindow(colorStrings.at(winner) + " wins by checkmate");
+		endGame(colorStrings.at(winner) + " wins by checkmate");
 		return true;
 	}
 	return false;
 }
 
 void GameEndChecker::handleStalemate() {
-	board->showGameOverWindow("Draw by stalemate");
+	endGame("Draw by stalemate");
 }
 
 void GameEndChecker::update50MoveCounter(Piece* movingPiece, Square* destination) {
@@ -60,7 +59,7 @@ void GameEndChecker::update50MoveCounter(Piece* movingPiece, Square* destination
 
 bool GameEndChecker::is50MoveRuleReached() {
 	if (fiftyMoveRuleCounter == 100) {
-		board->showGameOverWindow("Draw by 50-move rule");
+		endGame("Draw by 50-move rule");
 		return true;
 	}
 	return false;
@@ -72,7 +71,7 @@ void GameEndChecker::updatePositionCounts() {
 
 bool GameEndChecker::isRepetition() {
 	if (positionCounts[state->getCurrentFen()] == 3) {
-		board->showGameOverWindow("Draw by repetition");
+		endGame("Draw by repetition");
 		return true;
 	}
 	return false;
@@ -101,6 +100,11 @@ bool GameEndChecker::isMaterialInsufficient() {
 		if (!areSameColorBishops(whitePieces.at(0), blackPieces.at(0))) return false;
 	}
 
-	board->showGameOverWindow("Draw by insufficient material");
+	endGame("Draw by insufficient material");
 	return true;
+}
+
+void GameEndChecker::endGame(QString outcome) {
+	context->stopClock();
+	board->showGameOverWindow(outcome);
 }

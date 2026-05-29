@@ -3,6 +3,7 @@
 #include "enums.h"
 #include<qhash.h>
 
+class GameContext;
 class GameState;
 class BoardRenderer;
 class PositionAnalyzer;
@@ -15,8 +16,11 @@ class GameEndChecker {
 	PositionAnalyzer* analyzer;
 	int fiftyMoveRuleCounter = 0;
 	QHash<QString, int> positionCounts;
+	GameContext* context;
 public:
 	GameEndChecker(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer);
+
+	void setContext(GameContext* context);
 
 	bool hasLegalMoves(PieceColor turnColor);
 	void ifGameIsOver();
@@ -32,4 +36,6 @@ public:
 
 	bool areSameColorBishops(Piece* whitePiece, Piece* blackPiece);
 	bool isMaterialInsufficient();
+
+	void endGame(QString outcome);
 };

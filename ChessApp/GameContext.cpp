@@ -11,12 +11,11 @@
 
 GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) :
-	whitePlayer(PieceColor::White, "White", 25000), blackPlayer(PieceColor::Black, "Black", 25000),
+	whitePlayer(PieceColor::White, "White", 300000), blackPlayer(PieceColor::Black, "Black", 300000),
 	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {
 
 	clockTimer = new QTimer();
 	connect(clockTimer, &QTimer::timeout, this, &GameContext::updateClock);
-	clockTimer->start(50);
 	elapsedTimer.start();
 };
 
@@ -161,7 +160,7 @@ void GameContext::offerDraw(Player offerer) {
 	}
 
 	if (drawOfferActive) {
-		board->showGameOverWindow("Draw by agreement");
+		gameEndings->endGame("Draw by agreement");
 	}
 }
 
@@ -170,7 +169,12 @@ void GameContext::resign(Player loser) {
 		? PieceColor::Black
 		: PieceColor::White;
 
-	board->showGameOverWindow(colorStrings.at(winner) + " wins by resignation");
+	gameEndings->endGame(colorStrings.at(winner) + " wins by resignation");
+}
+
+void GameContext::startClock() {
+	elapsedTimer.restart();
+	clockTimer->start(50);
 }
 
 void GameContext::updateClock() {
@@ -185,8 +189,12 @@ void GameContext::updateClock() {
 	if (turnPlayer.getRemainingTime() <= 0) {
 		auto winner = turnPlayer.getColor() == PieceColor::White ?
 			PieceColor::Black : PieceColor::White;
-		board->showGameOverWindow(colorStrings.at(winner) + " wins by timeout");
+		gameEndings->endGame(colorStrings.at(winner) + " wins by timeout");
 	}
 
 	board->updateClockDisplay(turnPlayer);
+}
+
+void GameContext::stopClock() {
+	clockTimer->stop();
 }
