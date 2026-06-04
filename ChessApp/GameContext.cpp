@@ -22,6 +22,8 @@ GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyze
 Player GameContext::getWhitePlayer() { return whitePlayer; }
 Player GameContext::getBlackPlayer() { return blackPlayer; }
 
+void GameContext::setLocalPlayerColor(PieceColor color) { localPlayerColor = color; }
+
 Player& GameContext::getTurnPlayer() {
 	return (state->getTurnColor() == PieceColor::White)
 		? whitePlayer
@@ -81,8 +83,9 @@ void GameContext::setupStartingPosition() {
 			}
 		}
 	}
-	state->generateFen();
+	state->updateCurrentFen();
 	gameEndings->updatePositionCounts();
+	state->getAllSquares();
 }
 
 void GameContext::selectSquare(Square* square) {
@@ -101,7 +104,7 @@ void GameContext::selectSquare(Square* square) {
 
 		board->highlightSelected(selectedSquare);
 		for (Square* legalMove : legalMoves) {
-			board->highlightMove(legalMove);
+			board->highlightLegalMove(legalMove);
 		}
 	}
 }
@@ -111,43 +114,59 @@ void GameContext::resetSelectedSquare() {
 	selectedSquare = nullptr;
 }
 
-void GameContext::handleSquareClick(Square* square) {
+void GameContext::updateGameStateAfterMove() {
+	state->switchTurn();
+	state->updateCurrentFen();
+	state->updateMoveCount();
+	gameEndings->updatePositionCounts();
+	gameEndings->ifGameIsOver();
+}
+
+void GameContext::handleSquareClick(Square* clickedSquare) {
 	if (!board->getBoardActive()) return;
+	if (state->getTurnColor() != localPlayerColor) return;
 	if (board->getPromotionMenuActive()) return;
 
 	if (!selectedSquare) {
-		if (square->isOccupied() && square->getPiece()->getColor() != state->getTurnColor()) return;
-		selectSquare(square);
+		if (clickedSquare->isOccupied() && clickedSquare->getPiece()->getColor() != state->getTurnColor()) 
+			return;
+		selectSquare(clickedSquare);
 		return;
 	}
 
 	Piece* selectedPiece = selectedSquare->getPiece();
 
 	auto legalMoves = selectedPiece->getLegalMoves();
-	if (find(legalMoves.begin(), legalMoves.end(), square) != legalMoves.end()) {
-		selectedPiece->moveTo(square);
+	if (find(legalMoves.begin(), legalMoves.end(), clickedSquare) != legalMoves.end()) {
+		Square* originalSquare = selectedPiece->getSquare();
+		int fromIndex = originalSquare->getIndex();
+		int toIndex = clickedSquare->getIndex();
+
+		selectedPiece->moveTo(clickedSquare);
+		updateGameStateAfterMove();
 
 		resetSelectedSquare();
 		board->resetColorOfLegalMoves(legalMoves);
 
-		state->switchTurn();
-		state->generateFen();
-		state->updateMoveCount();
-		gameEndings->updatePositionCounts();
+		board->resetHighlightedMove();
+		board->highlightLastMove(originalSquare, clickedSquare);
+
+		if (!applyingNetworkMove) {
+			emit movePlayed(fromIndex, toIndex);
+		}
 
 		drawOfferActive = false;
 		board->removeDrawOfferMessage();
 
-		gameEndings->ifGameIsOver();
 		return;
 	}
 	
 	resetSelectedSquare();
 	board->resetColorOfLegalMoves(legalMoves);
 
-	if (square->isOccupied()) {
-		if (square->getPiece()->getColor() != state->getTurnColor()) return;
-		selectSquare(square);
+	if (clickedSquare->isOccupied()) {
+		if (clickedSquare->getPiece()->getColor() != state->getTurnColor()) return;
+		selectSquare(clickedSquare);
 		return;
 	}
 }
@@ -198,3 +217,7 @@ void GameContext::updateClock() {
 void GameContext::stopClock() {
 	clockTimer->stop();
 }
+
+void GameContext::setApplyingNetworkMove(bool value) { applyingNetworkMove = value; }
+
+bool GameContext::isApplyingNetworkMove() { return applyingNetworkMove; }

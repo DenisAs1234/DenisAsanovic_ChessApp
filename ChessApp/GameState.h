@@ -47,6 +47,7 @@ public:
 	void addEnPassantSquare(Square* square);
 	void resetEnPassantSquare();
 
-	void generateFen();
+	QString generateFen();
 	QString getCurrentFen();
+	void updateCurrentFen();
 };

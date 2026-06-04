@@ -110,37 +110,3 @@ void Piece::moveTo(Square* destination) {
 	context->getState()->resetEnPassantSquare();
 	onMove();
 }
-/*
-bool Piece::isMoveLegal(Square* destination) {
-	square->setPiece(nullptr);
-	
-	Square* originalSquare = square;
-	square = destination;
-
-	King* king = dynamic_cast<King*>(this);
-	if (king) {
-		if (color == PieceColor::White) { state->setWhiteKingPos(destination); }
-		else { state->setBlackKingPos(destination); }
-	}
-	
-	Piece* onDestination = destination->getPiece();
-	destination->setPiece(this);
-
-	bool isKingInCheck = logic->isKingInCheck(color);
-
-	square = originalSquare;
-	square->setPiece(this);
-	if (onDestination) {
-		destination->setPiece(onDestination);
-	}
-	else {
-		destination->setPiece(nullptr);
-	}
-
-	if (king) {
-		if (color == PieceColor::White) { state->setWhiteKingPos(originalSquare); }
-		else { state->setBlackKingPos(originalSquare); }
-	}
-
-	return isKingInCheck ? false : true;
-}*/

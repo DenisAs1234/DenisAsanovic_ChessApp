@@ -78,7 +78,7 @@ void GameState::updateMoveCount() {
 	}
 }
 
-void GameState::generateFen() {
+QString GameState::generateFen() {
 	QString fen = "";
 	int file = 0;
 	int consecutiveEmpty = 0;
@@ -119,9 +119,13 @@ void GameState::generateFen() {
 	fen += castlingRights + ' ' + enPassantSquare;
 
 	qDebug() << fen;
-	currentFen = fen;
+	return fen;
 }
 
 QString GameState::getCurrentFen() {
 	return currentFen;
+}
+
+void GameState::updateCurrentFen() {
+	currentFen = generateFen();
 }

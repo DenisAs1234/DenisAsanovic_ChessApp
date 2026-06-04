@@ -13,7 +13,10 @@ class GamePage : public QWidget
 public:
     GamePage(QWidget* parent = nullptr);
 
-    void startGame();
+    void startGame(QString& playerColor);
+    GameContext* getContext();
+    void applyNetworkMove(int fromIndex, int toIndex);
+    //void loadPosition(QString fen, int fromIndex, int toIndex);
 
 private:
     BoardRenderer* board;

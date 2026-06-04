@@ -17,25 +17,31 @@ vector<QGraphicsRectItem*>& BoardRenderer::getPromotionMenu() { return promotion
 bool BoardRenderer::getPromotionMenuActive() { return promotionMenuActive; }
 void BoardRenderer::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
 
-void BoardRenderer::drawBoard() {
+void BoardRenderer::drawBoard(PieceColor localPlayerColor) {
 	SquareColor color = SquareColor::dark;
+
 	qreal xPos = 0;
 	qreal yPos = 630;
+	
+	bool localIsWhite = localPlayerColor == PieceColor::White;
+	int step = localIsWhite ? 1 : -1;
+	int start = localIsWhite ? 1 : 8;
+	int end = start + (step * 8);
 
-	for (int rank = 1; rank <= 8; rank++) {
-		for (int file = 0; file < 8; file++) {
-			Square* square = new Square(static_cast<File>(file), rank, color, xPos, yPos, context);
+	for (int rank = start; rank != end; rank += step) {
+		for (int file = start; file != end; file += step) {
+			Square* square = new Square(static_cast<File>(file - 1), rank, color, xPos, yPos, context);
 			scene->addItem(square);
-			context->getState()->addSquare(getSquareIndex(rank, file), square);
+			context->getState()->addSquare(getSquareIndex(rank, file - 1), square);
 
 			xPos += 90;
-			if (file < 7) {
+			if (file != end - step) {
 				color = (color == SquareColor::dark) ? SquareColor::light : SquareColor::dark;
 			}
 		}
 		xPos = 0;
 		yPos -= 90;
-	}
+	}	
 }
 
 void BoardRenderer::drawPiece(Piece* piece) {
@@ -66,7 +72,7 @@ void BoardRenderer::highlightSelected(Square* square) {
 		: QColor(250, 209, 5)));
 }
 
-void BoardRenderer::highlightMove(Square* square) {
+void BoardRenderer::highlightLegalMove(Square* square) {
 	if (!square->isOccupied()) {
 		square->setBrush(QBrush(square->getColor() == SquareColor::dark 
 			? QColor(30, 156, 52) 
@@ -78,10 +84,33 @@ void BoardRenderer::highlightMove(Square* square) {
 		: QColor(66, 139, 255)));
 }
 
+void BoardRenderer::highlightLastMove(Square* startingSquare, Square* destination) {
+	startingSquare->setBrush(
+		QBrush(startingSquare->getColor() == SquareColor::dark
+			? QColor(252, 186, 3)
+			: QColor(250, 209, 5)));
+
+	destination->setBrush(
+		QBrush(destination->getColor() == SquareColor::dark
+			? QColor(252, 186, 3)
+			: QColor(250, 209, 5)));
+
+	lastMoveFrom = startingSquare;
+	lastMoveTo = destination;
+}
+
 void BoardRenderer::resetColorOfLegalMoves(vector<Square*> legalMoves) {
 	for (Square* legalMove : legalMoves) {
 		resetColor(legalMove);
 	}
+}
+
+void BoardRenderer::resetHighlightedMove() {
+	if (lastMoveFrom)
+		resetColor(lastMoveFrom);
+
+	if (lastMoveTo)
+		resetColor(lastMoveTo);
 }
 
 void BoardRenderer::drawPromotionMenu(Pawn* promotingPawn, Square* destination) {

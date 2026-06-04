@@ -8,6 +8,7 @@ class QTcpSocket;
 class QPushButton;
 class QLineEdit;
 class QComboBox;
+class QVBoxLayout;
 class GamePage;
 
 class MainWindow : public QMainWindow
@@ -32,6 +33,10 @@ private:
     QComboBox* timeBox;
     QComboBox* variantBox;
 
+    QWidget* lobbyFrame;
+    QVBoxLayout* gamesLayout;
+    QPushButton* backToMenuButton;
+
     QPushButton* createGameButton;
     QPushButton* joinGameButton;
 
@@ -39,4 +44,8 @@ private:
     void createMenuWidgets();
     void setupMenuStyles();
     void setupMenuLayout();
+
+    void setupLobbyUI();
+    void addLobbyEntry(QString nickname, QString variant, QString timeControl, QString skill);
+    void clearLobby();
 };

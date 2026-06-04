@@ -31,6 +31,8 @@ qreal Square::getY() { return pos().y(); }
 
 SquareColor Square::getColor() { return color; }
 
+int Square::getIndex() { return (rank - 1) * 8 + this->getFile(); }
+
 Piece* Square::getPiece() {
     return piece;
 }

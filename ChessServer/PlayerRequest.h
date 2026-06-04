@@ -8,7 +8,7 @@ struct PlayerRequest
     QString nickname;
     QString variant;
     QString timeControl;
-    int skill;
+    QString skill;
 
     QTcpSocket* socket;
 };

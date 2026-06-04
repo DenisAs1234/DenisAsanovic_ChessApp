@@ -15,21 +15,29 @@ class Player;
 
 class BoardRenderer : public QGraphicsRectItem {
 	QGraphicsScene* scene;
+	bool boardActive = true;
+
+	Square* lastMoveFrom = nullptr;
+	Square* lastMoveTo = nullptr;
+
 	QGraphicsTextItem* whiteClock;
 	QGraphicsTextItem* blackClock;
 	QString lastDisplayedTime;
+
 	vector<QGraphicsRectItem*> promotionMenu;
-	bool boardActive = true;
 	bool promotionMenuActive = false;
+
 	QGraphicsTextItem* drawOfferMsg = nullptr;
+
 	GameContext* context;
+
 public:
 	BoardRenderer(QGraphicsScene* scene);
 
 	QGraphicsScene* getScene();
 	void setContext(GameContext* context);
 
-	void drawBoard();
+	void drawBoard(PieceColor localPlayerColor);
 	void drawPiece(Piece* piece);
 	void removeFromBoard(Piece* piece);
 
@@ -39,8 +47,11 @@ public:
 
 	void resetColor(Square* square);
 	void highlightSelected(Square* square);
-	void highlightMove(Square* square);
+	void highlightLegalMove(Square* square);
+	void highlightLastMove(Square* startingSquare, Square* destination);
+
 	void resetColorOfLegalMoves(vector<Square*> legalMoves);
+	void resetHighlightedMove();
 
 	void drawPromotionMenu(Pawn* promotingPawn, Square* destination);
 	vector<QGraphicsRectItem*>& getPromotionMenu();

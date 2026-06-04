@@ -24,16 +24,12 @@ public:
 	qreal getX();
 	qreal getY();
 	SquareColor getColor();
+	int getIndex();
 
 	Piece* getPiece();
 	void setPiece(Piece* piece);
-	/*
-	void resetColor();
-	void highlightSelected();
-	void highlightMove();*/
 
 	bool isOccupied();
-	//bool isSafe();
 
 	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 };

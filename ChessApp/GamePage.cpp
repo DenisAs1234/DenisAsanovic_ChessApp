@@ -7,6 +7,7 @@
 #include "SpecialMoveHandler.h"
 #include "GameEndChecker.h"
 #include "PieceFactory.h"
+#include "Square.h"
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -39,14 +40,44 @@ GamePage::GamePage(QWidget* parent)
     layout->addWidget(view);
 }
 
-void GamePage::startGame()
-{
+void GamePage::startGame(QString& playerColor) {
+    PieceColor localPlayerColor = playerColor == "White" ? PieceColor::White : PieceColor::Black;
+    context->setLocalPlayerColor(localPlayerColor);
+    
     board->getScene()->clear();
 
-    board->drawBoard();
+    board->drawBoard(localPlayerColor);
     board->drawButtons();
     board->drawClocks();
 
     context->setupStartingPosition();
     context->startClock();
+}
+
+GameContext* GamePage::getContext() { return context; }
+/*
+void GamePage::loadPosition(QString fen, int fromIndex, int toIndex) {
+    context->loadPositionFromFen(fen);
+
+    auto allSquares = context->getState()->getAllSquares();
+    auto startingSquare = allSquares[fromIndex];
+    auto destination = allSquares[toIndex];
+    board->highlightLastMove(startingSquare, destination);
+}*/
+
+void GamePage::applyNetworkMove(int fromIndex, int toIndex) {
+    qDebug() << fromIndex << toIndex;
+
+    context->setApplyingNetworkMove(true);
+
+    Square* from = context->getState()->getAllSquares()[fromIndex];
+    Square* to = context->getState()->getAllSquares()[toIndex];
+
+    from->getPiece()->moveTo(to);
+    context->updateGameStateAfterMove();
+
+    board->resetHighlightedMove();
+    board->highlightLastMove(from, to);
+
+    context->setApplyingNetworkMove(false);
 }
