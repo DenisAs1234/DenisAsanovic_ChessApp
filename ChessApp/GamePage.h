@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include "enums.h"
 
 class BoardRenderer;
 class GameContext;
@@ -15,7 +16,7 @@ public:
 
     void startGame(QString& playerColor);
     GameContext* getContext();
-    void applyNetworkMove(int fromIndex, int toIndex);
+    void applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int rookTo, int promotionPiece);
     //void loadPosition(QString fen, int fromIndex, int toIndex);
 
 private:

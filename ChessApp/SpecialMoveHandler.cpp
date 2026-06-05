@@ -6,10 +6,12 @@
 #include "SquareIndex.h"
 #include "Pawn.h"
 #include "PieceFactory.h"
+#include "GameContext.h"
 
-SpecialMoveHandler::SpecialMoveHandler(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) : 
-	state(state), board(board), analyzer(analyzer) {}
+SpecialMoveHandler::SpecialMoveHandler(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) 
+	: state(state), board(board), analyzer(analyzer) {}
 
+void SpecialMoveHandler::setContext(GameContext* context) { this->context = context; }
 void SpecialMoveHandler::setFactory(PieceFactory* factory) { this->factory = factory; }
 
 void SpecialMoveHandler::checkForPawnsNextTo(Pawn* passingPawn) {
@@ -92,17 +94,37 @@ void SpecialMoveHandler::clearEnPassants() {
 	}
 }
 
+bool SpecialMoveHandler::isPromotionPending() { return promotionPending; }
+int SpecialMoveHandler::getPendingPromotionFrom() { return pendingPromotionFrom; }
+int SpecialMoveHandler::getPendingPromotionTo() { return pendingPromotionTo; }
+void SpecialMoveHandler::setPendingPromotionFrom(int fromIndex) { pendingPromotionFrom = fromIndex; }
+void SpecialMoveHandler::setPendingPromotionTo(int toIndex) { pendingPromotionTo = toIndex; }
+int SpecialMoveHandler::getPromotionPiece() { return promotionPiece; }
+
 bool SpecialMoveHandler::checkIfPromotion(Pawn* promotingPawn, Square* destination) {
 	int rank = destination->getRank();
-	if (rank == 1 || rank == 8) {
-		board->drawPromotionMenu(promotingPawn, destination);
+
+	if (rank != 1 && rank != 8)
+		return false;
+
+	if (context->isApplyingNetworkMove()) {
+		this->promotingPawn = promotingPawn;
 		return true;
 	}
-	return false;
+
+	promotionPending = true;
+	board->drawPromotionMenu(promotingPawn, destination);
+	return true;
 }
 
 void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, Square* destination) {
 	board->removeFromBoard(promotingPawn);
+	state->removePiece(promotingPawn);
+
+	promotionPiece = static_cast<int>(type);
+	
+	if (!context->isApplyingNetworkMove())
+		context->finishPromotionMove();
 
 	QString path = ":/assets/" + colorStrings.at(promotingPawn->getColor()) + pieceStrings.at(type) + ".png";
 	Piece* piece = factory->createPiece(type, promotingPawn->getColor(), destination, path);
@@ -112,6 +134,21 @@ void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, S
 	promotingPawn->setPromotedTo(piece);
 	destination->setPiece(piece);
 }
+
+void SpecialMoveHandler::executePromotionFromNetwork(PieceColor color, PieceType type, Square* destination)
+{
+	board->removeFromBoard(promotingPawn);
+	state->removePiece(promotingPawn);
+
+	QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
+	Piece* piece = factory->createPiece(type, color, destination, path);
+
+	board->drawPiece(piece);
+	destination->setPiece(piece);
+}
+
+int SpecialMoveHandler::getCastlingRookFrom() { return castlingRookFrom; }
+int SpecialMoveHandler::getCastlingRookTo() { return castlingRookTo; }
 
 bool SpecialMoveHandler::canCastle(King* king, CastlingType castlingType) {
 	int rank = king->getSquare()->getRank();
@@ -142,6 +179,8 @@ bool SpecialMoveHandler::canCastle(King* king, CastlingType castlingType) {
 }
 
 void SpecialMoveHandler::checkIfCastlingMove(King* king, Square* destination) {
+	if (context->isApplyingNetworkMove())
+		return;
 	king->findVisibleSquares();
 	auto visibleSquares = king->getVisibleSquares();
 
@@ -158,9 +197,12 @@ void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
 	Square* rookDestination = (destination->getFile() == 6)
 		? allSquares[getSquareIndex(destination->getRank(), 5)]
 		: allSquares[getSquareIndex(destination->getRank(), 3)];
-
+	
 	for (auto& castlingMove : king->getCastlingMoves()) {
 		if (destination == castlingMove.first) {
+			castlingRookFrom = castlingMove.second->getSquare()->getIndex();
+			castlingRookTo = rookDestination->getIndex();
+
 			castlingMove.second->moveTo(rookDestination);
 			break;
 		}
@@ -173,4 +215,14 @@ void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
 	}
 	state->removeCastlingRight('k');
 	state->removeCastlingRight('q');
+}
+
+void SpecialMoveHandler::clearSpecialMoveData() {
+	castlingRookFrom = -1;
+	castlingRookTo = -1;
+	promotionPiece = -1;
+	pendingPromotionFrom = -1;
+	pendingPromotionTo = -1;
+	promotionPending = false;
+	promotingPawn = nullptr;
 }

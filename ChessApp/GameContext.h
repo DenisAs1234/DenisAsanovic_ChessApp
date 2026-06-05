@@ -36,6 +36,9 @@ class GameContext : public QObject {
 
 	bool applyingNetworkMove = false;
 
+	int lastRookFrom = -1;
+	int lastRookTo = -1;
+
 public:
 	GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 		SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings);
@@ -61,6 +64,7 @@ public:
 	void handleSquareClick(Square* square);
 
 	void updateGameStateAfterMove();
+	void finishPromotionMove();
 
 	void offerDraw(Player player);
 	void resign(Player player);
@@ -73,5 +77,9 @@ public:
 	bool isApplyingNetworkMove();
 
 signals:
-	void movePlayed(int fromIndex, int toIndex);
+	void movePlayed(int fromIndex, 
+					int toIndex, 
+					int castlingRookFrom, 
+					int castlingRookTo,
+					int promotionPiece);
 };

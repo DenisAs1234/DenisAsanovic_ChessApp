@@ -143,6 +143,16 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		int toIndex = clickedSquare->getIndex();
 
 		selectedPiece->moveTo(clickedSquare);
+
+		if (specialMoves->isPromotionPending()) {
+			specialMoves->setPendingPromotionFrom(fromIndex);
+			specialMoves->setPendingPromotionTo(toIndex);
+
+			resetSelectedSquare();
+			board->resetColorOfLegalMoves(legalMoves);
+			return;
+		}
+
 		updateGameStateAfterMove();
 
 		resetSelectedSquare();
@@ -152,7 +162,14 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		board->highlightLastMove(originalSquare, clickedSquare);
 
 		if (!applyingNetworkMove) {
-			emit movePlayed(fromIndex, toIndex);
+			emit movePlayed(
+				fromIndex,
+				toIndex,
+				specialMoves->getCastlingRookFrom(),
+				specialMoves->getCastlingRookTo(),
+				specialMoves->getPromotionPiece());
+
+			specialMoves->clearSpecialMoveData();
 		}
 
 		drawOfferActive = false;
@@ -169,6 +186,25 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		selectSquare(clickedSquare);
 		return;
 	}
+}
+
+void GameContext::finishPromotionMove() {
+	updateGameStateAfterMove();
+
+	Square* from = state->getAllSquares()[specialMoves->getPendingPromotionFrom()];
+	Square* to = state->getAllSquares()[specialMoves->getPendingPromotionTo()];
+
+	board->resetHighlightedMove();
+	board->highlightLastMove(from, to);
+
+	emit movePlayed(
+		specialMoves->getPendingPromotionFrom(),
+		specialMoves->getPendingPromotionTo(),
+		specialMoves->getCastlingRookFrom(),
+		specialMoves->getCastlingRookTo(),
+		specialMoves->getPromotionPiece());
+
+	specialMoves->clearSpecialMoveData();
 }
 
 void GameContext::offerDraw(Player offerer) {
@@ -203,7 +239,6 @@ void GameContext::updateClock() {
 	Player& turnPlayer = getTurnPlayer();
 
 	turnPlayer.setRemainingTime(turnPlayer.getRemainingTime() - elapsedMs);
-	//qDebug() << turnPlayer.getRemainingTime();
 
 	if (turnPlayer.getRemainingTime() <= 0) {
 		auto winner = turnPlayer.getColor() == PieceColor::White ?

@@ -33,21 +33,16 @@ MainWindow::MainWindow(QWidget* parent)
     gamePage = new GamePage();
 
     connect(gamePage->getContext(), &GameContext::movePlayed, this,
-        [=](int from, int to) {
-            QString msg = "MOVE|" + QString::number(from) + "|" + QString::number(to);
-            socket->write(msg.toUtf8());
-        });
-    /*
-    connect(gamePage->getContext(), &GameContext::positionChanged, this,
-        [=](QString fen, int fromIndex, int toIndex) {
-            QString msg =
-                "POSITION|" +
-                fen + "|" +
-                QString::number(fromIndex) + "|" +
-                QString::number(toIndex);
+        [=](int from, int to, int rookFrom, int rookTo, int promotionPiece) {
+            QString msg = "MOVE|" +
+                QString::number(from) + "|" +
+                QString::number(to) + "|" +
+                QString::number(rookFrom) + "|" +
+                QString::number(rookTo) + "|" +
+                QString::number(promotionPiece);
 
             socket->write(msg.toUtf8());
-        });*/
+        });
 
     stackedWidget->addWidget(menuPage);
     stackedWidget->addWidget(lobbyPage);
@@ -96,12 +91,18 @@ MainWindow::MainWindow(QWidget* parent)
 
                 QStringList parts = line.split('|');
 
+                if (parts.size() != 6)
+                    continue;
+
                 int from = parts[1].toInt();
                 int to = parts[2].toInt();
+                int rookFrom = parts[3].toInt();
+                int rookTo = parts[4].toInt();
+                int promotionPiece = parts[5].toInt();
 
-                gamePage->applyNetworkMove(from, to);
+                gamePage->applyNetworkMove(from, to, rookFrom, rookTo, promotionPiece);
 
-                return;
+                continue;
             }
             /*
             if (line.startsWith("POSITION|"))

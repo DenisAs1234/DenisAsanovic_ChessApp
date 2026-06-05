@@ -26,6 +26,7 @@ GamePage::GamePage(QWidget* parent)
     context = new GameContext(state, board, analyzer, specialMoves, gameEndings);
 
     board->setContext(context);
+    specialMoves->setContext(context);
     gameEndings->setContext(context);
 
     auto factory = new PieceFactory(context);
@@ -55,25 +56,34 @@ void GamePage::startGame(QString& playerColor) {
 }
 
 GameContext* GamePage::getContext() { return context; }
-/*
-void GamePage::loadPosition(QString fen, int fromIndex, int toIndex) {
-    context->loadPositionFromFen(fen);
 
-    auto allSquares = context->getState()->getAllSquares();
-    auto startingSquare = allSquares[fromIndex];
-    auto destination = allSquares[toIndex];
-    board->highlightLastMove(startingSquare, destination);
-}*/
-
-void GamePage::applyNetworkMove(int fromIndex, int toIndex) {
+void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int rookTo, int promotionPiece) {
     qDebug() << fromIndex << toIndex;
 
     context->setApplyingNetworkMove(true);
 
-    Square* from = context->getState()->getAllSquares()[fromIndex];
-    Square* to = context->getState()->getAllSquares()[toIndex];
+    auto allSquares = context->getState()->getAllSquares();
+
+    Square* from = allSquares[fromIndex];
+    Square* to = allSquares[toIndex];
 
     from->getPiece()->moveTo(to);
+
+    if (rookFrom != -1) {
+        Square* rookStart = allSquares[rookFrom];
+        Square* rookEnd = allSquares[rookTo];
+
+        if (rookStart->getPiece())
+            rookStart->getPiece()->moveTo(rookEnd);
+    }
+
+    if (promotionPiece != -1) {
+        PieceColor color = context->getState()->getTurnColor();
+
+        context->getSpecialMoves()->executePromotionFromNetwork(
+            color, static_cast<PieceType>(promotionPiece), to);
+    }
+
     context->updateGameStateAfterMove();
 
     board->resetHighlightedMove();

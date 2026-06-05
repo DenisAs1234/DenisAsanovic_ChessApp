@@ -28,7 +28,7 @@ enum class CastlingType {
 };
 
 enum class ButtonAction {
-    OfferDraw, AcceptDraw, Resign
+    OfferDraw, Resign
 };
 
 inline const map<PieceType, QString> pieceStrings = {
