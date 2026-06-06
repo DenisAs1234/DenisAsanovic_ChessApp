@@ -11,7 +11,7 @@
 
 GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) :
-	whitePlayer(PieceColor::White, "White", 300000), blackPlayer(PieceColor::Black, "Black", 300000),
+	whitePlayer(PieceColor::White, "White"), blackPlayer(PieceColor::Black, "Black"),
 	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {
 
 	clockTimer = new QTimer();
@@ -22,7 +22,20 @@ GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyze
 Player GameContext::getWhitePlayer() { return whitePlayer; }
 Player GameContext::getBlackPlayer() { return blackPlayer; }
 
+PieceColor GameContext::getLocalPlayerColor() { return localPlayerColor; }
 void GameContext::setLocalPlayerColor(PieceColor color) { localPlayerColor = color; }
+
+void GameContext::setVariant(ChessVariant variant) { this->variant = variant; }
+
+void GameContext::setTimeControl(TimeControl time) { 
+	this->timeControl = time; 
+
+	whitePlayer.setRemainingTime(time.initial);
+	blackPlayer.setRemainingTime(time.initial);
+
+	board->updateClockDisplay(whitePlayer);
+	board->updateClockDisplay(blackPlayer);
+}
 
 Player& GameContext::getTurnPlayer() {
 	return (state->getTurnColor() == PieceColor::White)
@@ -115,6 +128,7 @@ void GameContext::resetSelectedSquare() {
 }
 
 void GameContext::updateGameStateAfterMove() {
+	addIncrement();
 	state->switchTurn();
 	state->updateCurrentFen();
 	state->updateMoveCount();
@@ -251,6 +265,18 @@ void GameContext::updateClock() {
 
 void GameContext::stopClock() {
 	clockTimer->stop();
+}
+
+void GameContext::addIncrement() {
+	if (timeControl.increment == 0)
+		return;
+
+	Player& playerWhoMoved = state->getTurnColor() == PieceColor::White
+		? whitePlayer
+		: blackPlayer;
+
+	playerWhoMoved.setRemainingTime(playerWhoMoved.getRemainingTime() + timeControl.increment);
+	board->updateClockDisplay(playerWhoMoved);
 }
 
 void GameContext::setApplyingNetworkMove(bool value) { applyingNetworkMove = value; }

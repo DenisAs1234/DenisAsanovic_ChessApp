@@ -213,41 +213,19 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 }
 
 void BoardRenderer::drawButtons() {
-	GameButton* whiteDraw =
-		new GameButton(ButtonAction::OfferDraw,
-			"Offer draw",
-			context->getWhitePlayer(),
-			context,
-			780, 500);
+	Player localPlayer = context->getLocalPlayerColor() == PieceColor::White
+		? context->getWhitePlayer()
+		: context->getBlackPlayer();
 
-	scene->addItem(whiteDraw);
+	GameButton* draw = 
+		new GameButton(ButtonAction::OfferDraw, "Offer draw", localPlayer, context, 780, 500);
 
-	GameButton* whiteResign =
-		new GameButton(ButtonAction::Resign,
-			"White Resign",
-			context->getWhitePlayer(),
-			context,
-			780, 570);
+	scene->addItem(draw);
 
-	scene->addItem(whiteResign);
+	GameButton* resign =
+		new GameButton(ButtonAction::Resign, "Resign", localPlayer, context, 780, 570);
 
-	GameButton* blackDraw =
-		new GameButton(ButtonAction::OfferDraw,
-			"Offer draw",
-			context->getBlackPlayer(),
-			context,
-			780, 100);
-
-	scene->addItem(blackDraw);
-
-	GameButton* blackResign =
-		new GameButton(ButtonAction::Resign,
-			"Black Resign",
-			context->getBlackPlayer(),
-			context,
-			780, 170);
-
-	scene->addItem(blackResign);
+	scene->addItem(resign);
 }
 
 void BoardRenderer::showDrawOfferMessage(PieceColor offerer) {
@@ -278,8 +256,8 @@ void BoardRenderer::removeDrawOfferMessage() {
 void BoardRenderer::drawClocks() {
 	QFont clockFont("Arial", 20, QFont::Bold);
 
-	whiteClock = new QGraphicsTextItem("0:25");
-	blackClock = new QGraphicsTextItem("0:25");
+	whiteClock = new QGraphicsTextItem("0:00");
+	blackClock = new QGraphicsTextItem("0:00");
 
 	whiteClock->setFont(clockFont);
 	blackClock->setFont(clockFont);
@@ -287,8 +265,19 @@ void BoardRenderer::drawClocks() {
 	whiteClock->setDefaultTextColor(Qt::black);
 	blackClock->setDefaultTextColor(Qt::black);
 
-	whiteClock->setPos(780, 440);
-	blackClock->setPos(780, 240);
+	PieceColor localColor = context->getLocalPlayerColor();
+
+	qreal localClockY = 440;
+	qreal opponentClockY = 240;
+
+	if (localColor == PieceColor::White) {
+		whiteClock->setPos(780, localClockY);
+		blackClock->setPos(780, opponentClockY);
+	}
+	else {
+		blackClock->setPos(780, localClockY);
+		whiteClock->setPos(780, opponentClockY);
+	}
 
 	scene->addItem(whiteClock);
 	scene->addItem(blackClock);
@@ -305,8 +294,6 @@ void BoardRenderer::updateClockDisplay(Player& player) {
 	if (player.getRemainingTime() < 20000) {
 		text += QString(".%1").arg(ms / 100 % 10);
 	}
-
-	if (text == lastDisplayedTime) return;
 
 	lastDisplayedTime = text;
 

@@ -2,6 +2,7 @@
 
 #include "enums.h"
 #include "Player.h"
+#include "TimeControl.h"
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QObject>
@@ -20,6 +21,9 @@ class GameContext : public QObject {
 	Player blackPlayer;
 	PieceColor localPlayerColor;
 
+	ChessVariant variant;
+	TimeControl timeControl;
+
 	Square* selectedSquare;
 
 	GameState* state;
@@ -36,15 +40,16 @@ class GameContext : public QObject {
 
 	bool applyingNetworkMove = false;
 
-	int lastRookFrom = -1;
-	int lastRookTo = -1;
-
 public:
 	GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
 		SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings);
 
 	void setFactory(PieceFactory* factory);
 
+	void setVariant(ChessVariant variant);
+	void setTimeControl(TimeControl timeControl);
+
+	PieceColor getLocalPlayerColor();
 	void setLocalPlayerColor(PieceColor color);
 	Player getWhitePlayer();
 	Player getBlackPlayer();
@@ -72,6 +77,7 @@ public:
 	void startClock();
 	void updateClock();
 	void stopClock();
+	void addIncrement();
 
 	void setApplyingNetworkMove(bool value);
 	bool isApplyingNetworkMove();

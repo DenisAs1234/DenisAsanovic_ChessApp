@@ -192,6 +192,9 @@
     <ClInclude Include="SpecialMoveHandler.h">
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
+    <ClInclude Include="TimeControl.h">
+      <Filter>Header Files\Logic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChessApp.rc">

@@ -7,7 +7,7 @@ class Player {
 	QString nickname;
 	qint64 remainingTime;
 public:
-	Player(PieceColor color, QString nickname, qint64 remainingTime);
+	Player(PieceColor color, QString nickname);
 
 	PieceColor getColor();
 	QString getNickname();

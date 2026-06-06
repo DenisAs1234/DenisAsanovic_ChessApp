@@ -20,7 +20,7 @@ enum class SquareColor {
 };
 
 enum class ChessVariant {
-	Standard, Chess960, Atomic
+	Classic, Chess960, Atomic
 };
 
 enum class CastlingType {
@@ -65,4 +65,10 @@ inline const map<pair<PieceColor, PieceType>, char> fenCharacters = {
     {{PieceColor::Black, PieceType::Rook}, 'r'},
     {{PieceColor::Black, PieceType::Queen}, 'q'},
     {{PieceColor::Black, PieceType::King}, 'k'},
+};
+
+inline const map<QString, ChessVariant> chessVariants = {
+    {"Classic", ChessVariant::Classic},
+    {"Chess960", ChessVariant::Chess960},
+    {"Atomic", ChessVariant::Atomic}
 };

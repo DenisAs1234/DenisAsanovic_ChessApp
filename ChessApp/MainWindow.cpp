@@ -73,14 +73,24 @@ MainWindow::MainWindow(QWidget* parent)
             if (line.startsWith("MATCH_FOUND")) {
 
                 QStringList parts = line.split('|');
-                if (parts.size() != 2) continue;
 
-                QString color = parts[1].trimmed();
+                if (parts.size() != 4)
+                    continue;
+
+                QString color = parts[1];
+                QString variant = parts[2];
+                QString timeControl = parts[3];
 
                 qDebug() << "MATCH RECEIVED";
-                qDebug() << "COLOR:" << color;
+                qDebug() << "Color:" << color;
+                qDebug() << "Variant:" << variant;
+                qDebug() << "Time:" << timeControl;
 
                 gamePage->startGame(color);
+
+                gamePage->getContext()->setVariant(chessVariants.at(variant));
+                gamePage->getContext()->setTimeControl(parseTimeControl(timeControl));
+
                 stackedWidget->setCurrentWidget(gamePage);
 
                 continue;
@@ -104,22 +114,6 @@ MainWindow::MainWindow(QWidget* parent)
 
                 continue;
             }
-            /*
-            if (line.startsWith("POSITION|"))
-            {
-                QStringList parts = line.split('|');
-
-                if (parts.size() != 4)
-                    continue;
-
-                QString fen = parts[1];
-                int fromIndex = parts[2].toInt();
-                int toIndex = parts[3].toInt();
-
-                gamePage->loadPosition(fen, fromIndex, toIndex);
-
-                continue;
-            }*/
 
             QStringList parts = line.split('|');
 

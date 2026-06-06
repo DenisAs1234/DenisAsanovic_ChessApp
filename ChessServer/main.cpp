@@ -108,14 +108,6 @@ int main(int argc, char* argv[])
 
                 waitingPlayers.push_back(request);
                 sendLobbyUpdate(waitingPlayers, connectedClients);
-                /*
-                if (data.startsWith("POSITION|")) {
-                    for (QTcpSocket* other : connectedClients) {
-                        if (other != client)
-                            other->write(data.toUtf8());
-                    }
-                    return;
-                }*/
 
                 for (int i = 0; i < waitingPlayers.size() - 1; i++)
                 {
@@ -130,8 +122,17 @@ int main(int argc, char* argv[])
                         QString requestColor = randomColor ? "White" : "Black";
                         QString otherColor = randomColor ? "Black" : "White";
 
-                        request.socket->write(("MATCH_FOUND|" + requestColor + "\n").toUtf8());
-                        other.socket->write(("MATCH_FOUND|" + otherColor + "\n").toUtf8());
+                        request.socket->write(
+                            ("MATCH_FOUND|" +
+                                requestColor + "|" +
+                                request.variant + "|" +
+                                request.timeControl + "\n").toUtf8());
+
+                        other.socket->write(
+                            ("MATCH_FOUND|" +
+                                otherColor + "|" +
+                                request.variant + "|" +
+                                request.timeControl + "\n").toUtf8());
 
                         waitingPlayers.remove(i);
                         waitingPlayers.pop_back();
