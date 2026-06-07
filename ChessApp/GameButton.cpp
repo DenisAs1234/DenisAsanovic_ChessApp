@@ -47,11 +47,7 @@ void GameButton::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 	case ButtonAction::OfferDraw: 
 		context->offerDraw(player);
 		break;
-	/*
-	case ButtonAction::AcceptDraw: 
-		context->acceptDraw();
-		break;
-		*/
+
 	case ButtonAction::Resign:
 		context->resign(player);
 		break;

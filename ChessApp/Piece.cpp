@@ -87,20 +87,24 @@ void Piece::moveTo(Square* destination) {
 	}
 
 	if (destination->isOccupied()) {
+		if (context->getVariant() == ChessVariant::Atomic) {
+			specialMoves->executeAtomicCapture(destination, this);
+		}
+
 		Piece* toBeCaptured = destination->getPiece();
+		
 		Rook* rook = dynamic_cast<Rook*>(toBeCaptured);
 		if (rook) {
 			rook->onCapture();
 		}
 
-		context->getBoard()->removeFromBoard(toBeCaptured);
-		context->getState()->removePiece(toBeCaptured);
+		context->capturePiece(toBeCaptured);
 	}
 
 	if (isPromotion) {
 		destination->setPiece(pawn->getPromotedTo());
 	}
-	else {
+	else if (this->square) {
 		square = destination;
 		destination->setPiece(this);
 		setPos(destination->getX() + 5, destination->getY() + 7);

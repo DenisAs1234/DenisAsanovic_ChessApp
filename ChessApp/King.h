@@ -14,8 +14,4 @@ public:
 	void findVisibleSquares() override;
 	void onMove() override;
 	vector<pair<Square*, Rook*>>& getCastlingMoves();
-	/*
-	bool canCastle(CastlingType castlingType);
-	void checkIfCastlingMove(Square* destination);
-	void executeCastling(Square* destination);*/
 };

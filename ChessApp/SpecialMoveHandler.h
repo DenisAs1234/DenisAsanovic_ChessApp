@@ -9,6 +9,7 @@ class PositionAnalyzer;
 class Pawn;
 class King;
 class Square;
+class Piece;
 class PieceFactory;
 
 class SpecialMoveHandler {
@@ -56,6 +57,9 @@ public:
 	bool canCastle(King* king, CastlingType castlingType);
 	void checkIfCastlingMove(King* king, Square* destination);
 	void executeCastling(King* king, Square* destination);
+
+	vector<Piece*> findAdjacentPieces(Square* captureSquare);
+	void executeAtomicCapture(Square* captureSquare, Piece* capturingPiece);
 
 	void clearSpecialMoveData();
 };

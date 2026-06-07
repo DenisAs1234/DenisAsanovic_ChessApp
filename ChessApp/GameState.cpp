@@ -35,6 +35,8 @@ void GameState::addPiece(Piece* piece) {
 }
 
 void GameState::removePiece(Piece* piece) {
+	if (piece->getType() == PieceType::King) return;
+
 	if (piece->getColor() == PieceColor::White) {
 		whitePieces.erase(find(whitePieces.begin(), whitePieces.end(), piece));
 		return;

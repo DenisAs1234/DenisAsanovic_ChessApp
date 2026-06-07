@@ -17,6 +17,8 @@ void King::findLegalMoves() {
 	auto visibleSquares = getVisibleSquares();
 
 	for (Square* newSquare : visibleSquares) {
+		if (context->getVariant() == ChessVariant::Atomic && newSquare->isOccupied()) continue;
+
 		if (newSquare->isOccupied() && newSquare->getPiece()->getColor() == this->color) continue;
 
 		if (context->getAnalyzer()->isMoveLegal(this, newSquare)) {
@@ -35,6 +37,7 @@ void King::findLegalMoves() {
 		Square* castlingSquare = context->getState()->getAllSquares()[index];
 		legalMoves.push_back(castlingSquare);
 	}
+
 	if (context->getSpecialMoves()->canCastle(this, CastlingType::Long)) {
 		int index = getSquareIndex(rank, 2);
 		Square* castlingSquare = context->getState()->getAllSquares()[index];

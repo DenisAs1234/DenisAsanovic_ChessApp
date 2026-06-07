@@ -85,6 +85,7 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
     }
 
     context->updateGameStateAfterMove();
+    context->clearDrawOffer();
 
     board->resetHighlightedMove();
     board->highlightLastMove(from, to);

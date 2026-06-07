@@ -85,7 +85,10 @@ int main(int argc, char* argv[])
                 QString data = client->readAll();
                 qDebug() << "Received:" << data;
 
-                if (data.startsWith("MOVE|")) {
+                if (data.startsWith("MOVE|") ||
+                    data.startsWith("DRAW_OFFER|") ||
+                    data.startsWith("DRAW_ACCEPTED") ||
+                    data.startsWith("RESIGN|")) {
                     qDebug() << "Broadcasting:" << data;
 
                     for (QTcpSocket* other : connectedClients) {

@@ -15,8 +15,12 @@ bool PositionAnalyzer::isMoveLegal(Piece* movingPiece, Square* destination) {
 
 	King* king = dynamic_cast<King*>(movingPiece);
 	if (king) {
-		if (king->getColor() == PieceColor::White) { state->setWhiteKingPos(destination); }
-		else { state->setBlackKingPos(destination); }
+		if (king->getColor() == PieceColor::White) { 
+			state->setWhiteKingPos(destination); 
+		}
+		else { 
+			state->setBlackKingPos(destination); 
+		}
 	}
 
 	Piece* onDestination = destination->getPiece();
@@ -34,8 +38,12 @@ bool PositionAnalyzer::isMoveLegal(Piece* movingPiece, Square* destination) {
 	}
 
 	if (king) {
-		if (king->getColor() == PieceColor::White) { state->setWhiteKingPos(originalSquare); }
-		else { state->setBlackKingPos(originalSquare); }
+		if (king->getColor() == PieceColor::White) { 
+			state->setWhiteKingPos(originalSquare); 
+		}
+		else { 
+			state->setBlackKingPos(originalSquare); 
+		}
 	}
 
 	return isMoveLegal;

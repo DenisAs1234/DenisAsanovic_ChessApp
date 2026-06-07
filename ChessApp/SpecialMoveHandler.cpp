@@ -2,6 +2,7 @@
 #include "GameState.h"
 #include "BoardRenderer.h"
 #include "PositionAnalyzer.h"
+#include "GameEndChecker.h"
 #include "Square.h"
 #include "SquareIndex.h"
 #include "Pawn.h"
@@ -215,6 +216,52 @@ void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
 	}
 	state->removeCastlingRight('k');
 	state->removeCastlingRight('q');
+}
+
+void SpecialMoveHandler::executeAtomicCapture(Square* captureSquare, Piece* capturingPiece) {
+	vector<Piece*> toBeCaptured = findAdjacentPieces(captureSquare);
+
+	toBeCaptured.push_back(capturingPiece);
+	
+	for (Piece* piece : toBeCaptured) {
+		Rook* rook = dynamic_cast<Rook*>(piece);
+		if (rook) {
+			rook->onCapture();
+		}
+
+		if (piece->getType() == PieceType::King) {
+			context->getGameEndings()->endGame(
+				colorStrings.at(capturingPiece->getColor()) + " wins by exploding the king");
+		}
+
+		context->capturePiece(piece);
+	}
+}
+
+vector<Piece*> SpecialMoveHandler::findAdjacentPieces(Square* captureSquare) {
+	vector<Piece*> adjacentPieces;
+
+	int captureRank = captureSquare->getRank();
+	int captureFile = captureSquare->getFile();
+
+	vector<pair<int, int>> directions = { {1,1}, {1,-1}, {-1,1}, {-1,-1}, {1,0}, {0,1}, {-1,0}, {0,-1} };
+
+	for (auto& dir : directions) {
+		int adjacentRank = captureRank + dir.first;
+		int adjacentFile = captureFile + dir.second;
+		int adjacentIndex = getSquareIndex(adjacentRank, adjacentFile);
+
+		if (adjacentIndex == -1) continue;
+
+		Square* adjacentSquare = state->getAllSquares()[adjacentIndex];
+		Piece* adjacentPiece = adjacentSquare->getPiece();
+
+		if (adjacentSquare->isOccupied() && adjacentPiece->getType() != PieceType::Pawn) {
+			adjacentPieces.push_back(adjacentPiece);
+		}
+	}
+
+	return adjacentPieces;
 }
 
 void SpecialMoveHandler::clearSpecialMoveData() {

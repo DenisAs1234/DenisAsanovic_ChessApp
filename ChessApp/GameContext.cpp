@@ -25,6 +25,7 @@ Player GameContext::getBlackPlayer() { return blackPlayer; }
 PieceColor GameContext::getLocalPlayerColor() { return localPlayerColor; }
 void GameContext::setLocalPlayerColor(PieceColor color) { localPlayerColor = color; }
 
+ChessVariant GameContext::getVariant() { return variant; }
 void GameContext::setVariant(ChessVariant variant) { this->variant = variant; }
 
 void GameContext::setTimeControl(TimeControl time) { 
@@ -169,6 +170,8 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 
 		updateGameStateAfterMove();
 
+		clearDrawOffer();
+
 		resetSelectedSquare();
 		board->resetColorOfLegalMoves(legalMoves);
 
@@ -198,8 +201,14 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 	if (clickedSquare->isOccupied()) {
 		if (clickedSquare->getPiece()->getColor() != state->getTurnColor()) return;
 		selectSquare(clickedSquare);
-		return;
 	}
+}
+
+void GameContext::capturePiece(Piece* piece) {
+	board->removeFromBoard(piece);
+	piece->getSquare()->setPiece(nullptr);
+	piece->setSquare(nullptr);
+	state->removePiece(piece);
 }
 
 void GameContext::finishPromotionMove() {
@@ -221,20 +230,45 @@ void GameContext::finishPromotionMove() {
 	specialMoves->clearSpecialMoveData();
 }
 
-void GameContext::offerDraw(Player offerer) {
+void GameContext::offerDraw(Player offerer)
+{
 	if (!drawOfferActive) {
 		drawOfferActive = true;
 		board->showDrawOfferMessage(offerer.getColor());
+
+		emit drawOffered(offerer.getColor());
 		return;
 	}
 
-	if (drawOfferActive) {
-		gameEndings->endGame("Draw by agreement");
-	}
+	gameEndings->endGame("Draw by agreement");
+	emit drawAccepted();
+}
+
+void GameContext::receiveDrawOffer(PieceColor offerer) {
+	drawOfferActive = true;
+	board->showDrawOfferMessage(offerer);
+}
+
+void GameContext::receiveDrawAccepted() {
+	gameEndings->endGame("Draw by agreement");
+}
+
+void GameContext::clearDrawOffer() {
+	drawOfferActive = false;
+	board->removeDrawOfferMessage();
 }
 
 void GameContext::resign(Player loser) {
 	PieceColor winner = (loser.getColor() == PieceColor::White)
+		? PieceColor::Black
+		: PieceColor::White;
+
+	gameEndings->endGame(colorStrings.at(winner) + " wins by resignation");
+	emit playerResigned(loser.getColor());
+}
+
+void GameContext::receiveResignation(PieceColor loser) {
+	PieceColor winner = (loser == PieceColor::White)
 		? PieceColor::Black
 		: PieceColor::White;
 

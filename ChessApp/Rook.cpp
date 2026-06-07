@@ -27,24 +27,33 @@ void Rook::findVisibleSquares() {
 bool Rook::getHasMoved() {
 	return hasMoved;
 }
+/*
+void Rook::setCapturePending(bool value) {
+	capturePending = value;
+}
+
+bool Rook::isCapturePending() {
+	return capturePending;
+}*/
 
 void Rook::onMove() {
 	if (hasMoved) return;
 	hasMoved = true;
+
 	GameState* state = context->getState();
-	state->removeCastlingRight(state->getCorrectCastlingChar(square->getFile(), color));
+
+	if (square) {
+		state->removeCastlingRight(state->getCorrectCastlingChar(square->getFile(), color));
+	}
+	/*
+	if (capturePending) {
+		context->capturePiece(this);
+	}*/
 }
 
 void Rook::onCapture() {
 	if (hasMoved) return;
+
 	GameState* state = context->getState();
 	state->removeCastlingRight(state->getCorrectCastlingChar(square->getFile(), color));
 }
-/*
-char Rook::getCorrectCastlingChar() {
-	int kingFile = board->getWhiteKingPos()->getFile();
-	if (square->getFile() < kingFile) {
-		return color == PieceColor::White ? 'Q' : 'q';
-	}
-	return color == PieceColor::White ? 'K' : 'k';
-}*/

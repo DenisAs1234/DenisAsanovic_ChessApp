@@ -44,6 +44,25 @@ MainWindow::MainWindow(QWidget* parent)
             socket->write(msg.toUtf8());
         });
 
+    connect(gamePage->getContext(), &GameContext::drawOffered, this,
+        [=](PieceColor offerer) {
+            socket->write(QString("DRAW_OFFER|%1\n")
+                .arg(static_cast<int>(offerer))
+                .toUtf8());
+        });
+
+    connect(gamePage->getContext(), &GameContext::drawAccepted, this,
+        [=]() {
+            socket->write("DRAW_ACCEPTED\n");
+        });
+
+    connect(gamePage->getContext(), &GameContext::playerResigned, this,
+        [=](PieceColor loser) {
+            socket->write(QString("RESIGN|%1\n")
+                .arg(static_cast<int>(loser))
+                .toUtf8());
+        });
+
     stackedWidget->addWidget(menuPage);
     stackedWidget->addWidget(lobbyPage);
     stackedWidget->addWidget(gamePage);
@@ -112,6 +131,28 @@ MainWindow::MainWindow(QWidget* parent)
 
                 gamePage->applyNetworkMove(from, to, rookFrom, rookTo, promotionPiece);
 
+                continue;
+            }
+
+            if (line.startsWith("DRAW_OFFER|")) {
+                QStringList parts = line.split('|');
+                PieceColor offerer = static_cast<PieceColor>(parts[1].toInt());
+
+                gamePage->getContext()->receiveDrawOffer(offerer);
+                continue;
+            }
+
+            if (line.startsWith("DRAW_ACCEPTED")) {
+                qDebug() << "DRAW ACCEPTED RECEIVED";
+                gamePage->getContext()->receiveDrawAccepted();
+                continue;
+            }
+
+            if (line.startsWith("RESIGN|")) {
+                QStringList parts = line.split('|');
+                PieceColor loser = static_cast<PieceColor>(parts[1].toInt());
+
+                gamePage->getContext()->receiveResignation(loser);
                 continue;
             }
 

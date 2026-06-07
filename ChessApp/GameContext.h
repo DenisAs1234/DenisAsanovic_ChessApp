@@ -13,6 +13,7 @@ class PositionAnalyzer;
 class SpecialMoveHandler;
 class GameEndChecker;
 class Square;
+class Piece;
 class PieceFactory;
 
 class GameContext : public QObject {
@@ -46,6 +47,7 @@ public:
 
 	void setFactory(PieceFactory* factory);
 
+	ChessVariant getVariant();
 	void setVariant(ChessVariant variant);
 	void setTimeControl(TimeControl timeControl);
 
@@ -68,11 +70,18 @@ public:
 	void resetSelectedSquare();
 	void handleSquareClick(Square* square);
 
+	void capturePiece(Piece* piece);
+
 	void updateGameStateAfterMove();
 	void finishPromotionMove();
 
-	void offerDraw(Player player);
+	void offerDraw(Player oferrer);
+	void receiveDrawOffer(PieceColor oferrer);
+	void receiveDrawAccepted();
+	void clearDrawOffer();
+
 	void resign(Player player);
+	void receiveResignation(PieceColor loser);
 
 	void startClock();
 	void updateClock();
@@ -88,4 +97,8 @@ signals:
 					int castlingRookFrom, 
 					int castlingRookTo,
 					int promotionPiece);
+
+	void drawOffered(PieceColor offerer);
+	void drawAccepted();
+	void playerResigned(PieceColor loser);
 };
