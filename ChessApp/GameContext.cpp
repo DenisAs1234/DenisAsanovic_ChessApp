@@ -55,9 +55,14 @@ GameEndChecker* GameContext::getGameEndings() { return gameEndings; }
 
 void GameContext::setFactory(PieceFactory* factory) { this->factory = factory; }
 
-void GameContext::setupStartingPosition() {
-	vector<PieceType> startingSetup = { PieceType::Rook, PieceType::Knight, PieceType::Bishop,
-		PieceType::Queen, PieceType::King, PieceType::Bishop, PieceType::Knight, PieceType::Rook };
+void GameContext::setupStartingPosition(QString orderOfPieces) {
+	specialMoves->setInitialKingFile(orderOfPieces.indexOf('K'));
+
+	specialMoves->setInitialQueensideRookFile(orderOfPieces.indexOf('R'));
+	int kingsideRookFile = specialMoves->getInitialKingsideRookFile();
+
+	specialMoves->setInitialKingsideRookFile(orderOfPieces.indexOf('R', kingsideRookFile + 1));
+
 	int file;
 
 	auto allSquares = state->getAllSquares();
@@ -65,21 +70,25 @@ void GameContext::setupStartingPosition() {
 	for (int rank = 1; rank <= 8; rank++) {
 		file = 0;
 		if (rank == 1 || rank == 8) {
-			for (PieceType type : startingSetup) {
+			for (QChar pieceChar : orderOfPieces) {
 				PieceColor color = colorsByRank.at(rank);
-				QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
+				PieceType type = pieceTypes.at(pieceChar);
+				QString pieceName = pieceStrings.at(type);
+
+				QString path = ":/assets/" + colorStrings.at(color) + pieceName + ".png";
+
 				Square* square = allSquares[(rank - 1) * 8 + file];
 				Piece* piece = factory->createPiece(type, color, square, path);
+
 				board->drawPiece(piece);
 				square->setPiece(piece);
 
 				if (type == PieceType::King) {
-					if (rank == 1) {
+					if (rank == 1) 
 						state->setWhiteKingPos(square);
-					}
-					else {
+					else 
 						state->setBlackKingPos(square);
-					}
+					specialMoves->setInitialKingFile(file);
 				}
 				file++;
 			}
@@ -155,9 +164,11 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 	if (find(legalMoves.begin(), legalMoves.end(), clickedSquare) != legalMoves.end()) {
 		Square* originalSquare = selectedPiece->getSquare();
 		int fromIndex = originalSquare->getIndex();
-		int toIndex = clickedSquare->getIndex();
 
 		selectedPiece->moveTo(clickedSquare);
+
+		auto destination = selectedPiece->getDestination();
+		int toIndex = destination ? destination->getIndex() : clickedSquare->getIndex();
 
 		if (specialMoves->isPromotionPending()) {
 			specialMoves->setPendingPromotionFrom(fromIndex);
@@ -176,7 +187,7 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		board->resetColorOfLegalMoves(legalMoves);
 
 		board->resetHighlightedMove();
-		board->highlightLastMove(originalSquare, clickedSquare);
+		board->highlightLastMove(originalSquare, state->getAllSquares()[toIndex]);
 
 		if (!applyingNetworkMove) {
 			emit movePlayed(
@@ -188,6 +199,8 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 
 			specialMoves->clearSpecialMoveData();
 		}
+
+		selectedPiece->resetDestination();
 
 		drawOfferActive = false;
 		board->removeDrawOfferMessage();

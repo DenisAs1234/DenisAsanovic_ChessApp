@@ -13,6 +13,7 @@ protected:
 	PieceType type;
 	PieceColor color;
 	Square* square;
+	Square* destination = nullptr;
 	int value;
 	QString path;
 	GameContext* context;
@@ -27,6 +28,8 @@ public:
 	void setSquare(Square* square);
 	int getValue();
 	QString getPath();
+	void resetDestination();
+	Square* getDestination();
 
 	vector<Square*> getLegalMoves();
 	vector<Square*> getVisibleSquares();

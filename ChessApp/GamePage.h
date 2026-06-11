@@ -14,7 +14,7 @@ class GamePage : public QWidget
 public:
     GamePage(QWidget* parent = nullptr);
 
-    void startGame(QString& playerColor);
+    void startGame(QString playerColor, QString orderOfPieces);
     GameContext* getContext();
     void applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int rookTo, int promotionPiece);
 

@@ -5,6 +5,7 @@
 #include <QVector>
 #include "PlayerRequest.h"
 #include <QRandomGenerator>
+#include "Chess960Generator.h"
 
 auto isCompatible = [](const PlayerRequest& a, const PlayerRequest& b) {
     return a.variant == b.variant &&
@@ -125,17 +126,26 @@ int main(int argc, char* argv[])
                         QString requestColor = randomColor ? "White" : "Black";
                         QString otherColor = randomColor ? "Black" : "White";
 
+                        QString startingPosition = "RNBQKBNR";
+                        
+                        if (request.variant == "Chess960") {
+                            auto chess960Generator = new Chess960Generator();
+                            startingPosition = chess960Generator->generateStartingPosition();
+                        }
+                        
                         request.socket->write(
                             ("MATCH_FOUND|" +
                                 requestColor + "|" +
                                 request.variant + "|" +
-                                request.timeControl + "\n").toUtf8());
+                                request.timeControl + "|" + 
+                                startingPosition + "\n").toUtf8());
 
                         other.socket->write(
                             ("MATCH_FOUND|" +
                                 otherColor + "|" +
                                 request.variant + "|" +
-                                request.timeControl + "\n").toUtf8());
+                                request.timeControl + "|" +
+                                startingPosition + "\n").toUtf8());
 
                         waitingPlayers.remove(i);
                         waitingPlayers.pop_back();

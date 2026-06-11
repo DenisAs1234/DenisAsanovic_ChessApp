@@ -63,7 +63,7 @@ public:
 	SpecialMoveHandler* getSpecialMoves();
 	GameEndChecker* getGameEndings();
 
-	void setupStartingPosition();
+	void setupStartingPosition(QString orderOfPieces);
 
 	Square* getSelectedSquare();
 	void selectSquare(Square* square);

@@ -43,6 +43,14 @@ vector<Square*> Piece::getVisibleSquares() {
 	return visibleSquares;
 }
 
+Square* Piece::getDestination() {
+	return destination;
+}
+
+void Piece::resetDestination() {
+	destination = nullptr;
+}
+
 void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 	int rank = square->getRank();
 	int file = square->getFile();
@@ -69,29 +77,33 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 	}
 }
 
-void Piece::moveTo(Square* destination) {
+void Piece::moveTo(Square* clickedSquare) {
 	square->setPiece(nullptr);
 	auto specialMoves = context->getSpecialMoves();
-	context->getGameEndings()->update50MoveCounter(this, destination);
+	context->getGameEndings()->update50MoveCounter(this, clickedSquare);
 
 	Pawn* pawn = dynamic_cast<Pawn*>(this);
 	bool isPromotion = false;
 	if (pawn) {
-		specialMoves->checkIfEnPassant(pawn, destination);
-		isPromotion = specialMoves->checkIfPromotion(pawn, destination);
+		specialMoves->checkIfEnPassant(pawn, clickedSquare);
+		isPromotion = specialMoves->checkIfPromotion(pawn, clickedSquare);
 	}
 
 	King* king = dynamic_cast<King*>(this);
+	Square* castlingDestination = nullptr;
 	if (king) {
-		specialMoves->checkIfCastlingMove(king, destination);
+		castlingDestination = specialMoves->checkIfCastlingMove(king, clickedSquare);
+	}
+	if (castlingDestination) {
+		this->destination = castlingDestination;
 	}
 
-	if (destination->isOccupied()) {
+	if (clickedSquare->isOccupied()) {
 		if (context->getVariant() == ChessVariant::Atomic) {
-			specialMoves->executeAtomicCapture(destination, this);
+			specialMoves->executeAtomicCapture(clickedSquare, this);
 		}
 
-		Piece* toBeCaptured = destination->getPiece();
+		Piece* toBeCaptured = clickedSquare->getPiece();
 		
 		Rook* rook = dynamic_cast<Rook*>(toBeCaptured);
 		if (rook) {
@@ -102,9 +114,12 @@ void Piece::moveTo(Square* destination) {
 	}
 
 	if (isPromotion) {
-		destination->setPiece(pawn->getPromotedTo());
+		clickedSquare->setPiece(pawn->getPromotedTo());
 	}
+
 	else if (this->square) {
+		Square* destination = castlingDestination ? castlingDestination : clickedSquare;
+
 		square = destination;
 		destination->setPiece(this);
 		setPos(destination->getX() + 5, destination->getY() + 7);

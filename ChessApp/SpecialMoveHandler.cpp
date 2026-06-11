@@ -148,65 +148,206 @@ void SpecialMoveHandler::executePromotionFromNetwork(PieceColor color, PieceType
 	destination->setPiece(piece);
 }
 
+void SpecialMoveHandler::setInitialKingFile(int file) { initialKingFile = file; }
+void SpecialMoveHandler::setInitialKingsideRookFile(int file) { initialKingsideRookFile = file; }
+void SpecialMoveHandler::setInitialQueensideRookFile(int file) { initialQueensideRookFile = file; }
+int SpecialMoveHandler::getInitialKingsideRookFile() { return initialKingsideRookFile; }
+int SpecialMoveHandler::getInitialQueensideRookFile() { return initialQueensideRookFile; }
+
 int SpecialMoveHandler::getCastlingRookFrom() { return castlingRookFrom; }
 int SpecialMoveHandler::getCastlingRookTo() { return castlingRookTo; }
 
-bool SpecialMoveHandler::canCastle(King* king, CastlingType castlingType) {
-	int rank = king->getSquare()->getRank();
-	int file = king->getSquare()->getFile();
+bool SpecialMoveHandler::canCastle(CastlingType castlingType) {
+	PieceColor turnColor = state->getTurnColor();
+	bool isShort = castlingType == CastlingType::Short;
 
-	int step = (castlingType == CastlingType::Short) ? 1 : -1;
-	file += step;
+	char castlingChar = isShort
+		? (turnColor == PieceColor::White ? 'K' : 'k')
+		: (turnColor == PieceColor::White ? 'Q' : 'q');
+
+	if (state->getCastlingRights().indexOf(castlingChar) == -1) return false;
+
 	auto allSquares = state->getAllSquares();
-	Square* kingDestination = (castlingType == CastlingType::Short)
+
+	int rank = (turnColor == PieceColor::White) ? 1 : 8;
+	int file = initialKingFile;
+
+	Square* kingDestination = isShort
 		? allSquares[getSquareIndex(rank, 6)]
 		: allSquares[getSquareIndex(rank, 2)];
+	int kingDestinationFile = kingDestination->getFile();
+
+	if (initialKingFile == kingDestinationFile) {
+		return isRookUnobstructed(isShort ? initialKingsideRookFile : initialQueensideRookFile,
+			                      isShort ? 5 : 3);
+	}
+
+	int step = (initialKingFile < kingDestinationFile) ? 1 : -1;
+	file += step;
 
 	while (file >= 0 && file <= 7) {
 		int index = getSquareIndex(rank, file);
 		Rook* rook = dynamic_cast<Rook*>(allSquares[index]->getPiece());
 
-		if (allSquares[index]->isOccupied() && !rook) return false;
-		if (!analyzer->isSquareSafe(allSquares[index])) return false;
-		if (!allSquares[index]->isOccupied()) {
-			file += step;
-			continue;
+		if (allSquares[index]->isOccupied() && !rook) 
+			return false;
+
+		if (!analyzer->isSquareSafe(allSquares[index])) 
+			return false;
+
+		if (file == kingDestinationFile) {
+			return isRookUnobstructed(isShort ? initialKingsideRookFile : initialQueensideRookFile,
+									  isShort ? 5 : 3);
 		}
-		if (rook->getHasMoved()) return false;
-		king->getCastlingMoves().push_back(pair<Square*, Rook*>(kingDestination, rook));
-		return true;
+
+		file += step;
 	}
-	return false;
 }
 
-void SpecialMoveHandler::checkIfCastlingMove(King* king, Square* destination) {
+bool SpecialMoveHandler::isRookUnobstructed(int currentFile, int destinationFile) {
+	int step = (currentFile < destinationFile) ? 1 : -1;
+
+	int rank = state->getTurnColor() == PieceColor::White ? 1 : 8;
+	int file = currentFile;
+
+	auto allSquares = state->getAllSquares();
+
+	do {
+		file += step;
+
+		int index = getSquareIndex(rank, file);
+		King* king = dynamic_cast<King*>(allSquares[index]->getPiece());
+
+		if (allSquares[index]->isOccupied() && !king)
+			return false;
+
+	} while (file != destinationFile);
+
+	return true;
+}
+
+/*
+bool SpecialMoveHandler::canCastle(King* king, CastlingType castlingType) { 
+	bool kingCanCastle = false; 
+	Rook* castlingRook = nullptr;
+
+	int rank = king->getSquare()->getRank(); 
+	int file = king->getSquare()->getFile(); 
+
+	auto allSquares = state->getAllSquares(); 
+
+	Square* kingDestination = (castlingType == CastlingType::Short) 
+		? allSquares[getSquareIndex(rank, 6)] 
+		: allSquares[getSquareIndex(rank, 2)]; 
+
+	int step = (file < kingDestination->getFile()) ? 1 : -1;
+	file += step;
+
+	while (file >= 0 && file <= 7) { 
+		int index = getSquareIndex(rank, file); 
+		Rook* rook = dynamic_cast<Rook*>(allSquares[index]->getPiece()); 
+
+		if (kingCanCastle) { 
+			if (rook) { 
+				king->getCastlingMoves().push_back(pair<Square*, Rook*>(kingDestination, rook)); 
+				return true; 
+			} 
+			file += step; 
+			continue; 
+		} 
+
+		if (rook) { 
+			castlingRook = rook; 
+		} 
+
+		if (rook && rook->getHasMoved()) return false; 
+
+		if (allSquares[index]->isOccupied() && !rook) return false; 
+
+		if (!analyzer->isSquareSafe(allSquares[index])) return false; 
+
+		if (file != kingDestination->getFile()) { 
+			file += step; 
+			continue; 
+		} 
+
+		if (!castlingRook) { 
+			file += step; 
+			kingCanCastle = true; 
+			continue; 
+		} 
+
+		king->getCastlingMoves().push_back(pair<Square*, Rook*>(kingDestination, rook)); 
+		return true; 
+	} 
+	return false; 
+}*/
+
+Square* SpecialMoveHandler::checkIfCastlingMove(King* king, Square* clickedSquare) {
 	if (context->isApplyingNetworkMove())
-		return;
-	king->findVisibleSquares();
-	auto visibleSquares = king->getVisibleSquares();
+		return nullptr;
+	
+	if (!clickedSquare->isOccupied()) 
+		return nullptr;
 
-	bool isCastlingMove = find(visibleSquares.begin(), visibleSquares.end(), destination)
-		== visibleSquares.end();
+	if (clickedSquare->getPiece()->getColor() != state->getTurnColor())
+		return nullptr;
 
-	if (isCastlingMove) {
-		executeCastling(king, destination);
-	}
+	auto allSquares = state->getAllSquares();
+
+	Square* destination = (initialKingFile < clickedSquare->getFile())
+		? allSquares[getSquareIndex(clickedSquare->getRank(), 6)]
+		: allSquares[getSquareIndex(clickedSquare->getRank(), 2)];
+
+	executeCastling(king, destination);
+	return destination;
 }
 
 void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
-	auto allSquares = state->getAllSquares();
+	auto allSquares = state->getAllSquares(); 
+
 	Square* rookDestination = (destination->getFile() == 6)
 		? allSquares[getSquareIndex(destination->getRank(), 5)]
 		: allSquares[getSquareIndex(destination->getRank(), 3)];
-	
-	for (auto& castlingMove : king->getCastlingMoves()) {
-		if (destination == castlingMove.first) {
-			castlingRookFrom = castlingMove.second->getSquare()->getIndex();
-			castlingRookTo = rookDestination->getIndex();
 
-			castlingMove.second->moveTo(rookDestination);
-			break;
-		}
+	Square* rookPosition = (destination->getFile() == 6)
+		? allSquares[getSquareIndex(destination->getRank(), initialKingsideRookFile)]
+		: allSquares[getSquareIndex(destination->getRank(), initialQueensideRookFile)];
+
+	Rook* castlingRook = dynamic_cast<Rook*>(rookPosition->getPiece());
+
+	castlingRookFrom = rookPosition->getIndex();
+	castlingRookTo = rookDestination->getIndex();
+
+	castlingRook->moveTo(rookDestination);
+
+	if (king->getColor() == PieceColor::White) {
+		state->removeCastlingRight('K');
+		state->removeCastlingRight('Q');
+		return;
+	}
+
+	state->removeCastlingRight('k');
+	state->removeCastlingRight('q');
+}
+
+/*
+void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
+	auto allSquares = state->getAllSquares();
+
+	Square* rookDestination = (destination->getFile() == 6)
+		? allSquares[getSquareIndex(destination->getRank(), 5)]
+		: allSquares[getSquareIndex(destination->getRank(), 3)];
+
+	for (auto& castlingMove : king->getCastlingMoves()) {
+		if (destination != castlingMove.first)
+			continue;
+
+		castlingRookFrom = castlingMove.second->getSquare()->getIndex();
+		castlingRookTo = rookDestination->getIndex();
+
+		castlingMove.second->moveTo(rookDestination);
+		break;
 	}
 
 	if (king->getColor() == PieceColor::White) {
@@ -214,9 +355,10 @@ void SpecialMoveHandler::executeCastling(King* king, Square* destination) {
 		state->removeCastlingRight('Q');
 		return;
 	}
+
 	state->removeCastlingRight('k');
 	state->removeCastlingRight('q');
-}
+}*/
 
 void SpecialMoveHandler::executeAtomicCapture(Square* captureSquare, Piece* capturingPiece) {
 	vector<Piece*> toBeCaptured = findAdjacentPieces(captureSquare);

@@ -40,6 +40,14 @@ inline const map<PieceType, QString> pieceStrings = {
     {PieceType::King,   "King"}
 };
 
+inline const map<QChar, PieceType> pieceTypes = {
+    {'K', PieceType::King},
+    {'N', PieceType::Knight},
+    {'B', PieceType::Bishop},
+    {'R', PieceType::Rook},
+    {'Q', PieceType::Queen}
+};
+
 inline const map<int, PieceColor> colorsByRank = {
     {1, PieceColor::White},
     {2, PieceColor::White},

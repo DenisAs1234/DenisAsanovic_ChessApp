@@ -93,21 +93,24 @@ MainWindow::MainWindow(QWidget* parent)
 
                 QStringList parts = line.split('|');
 
-                if (parts.size() != 4)
+                if (parts.size() != 5)
                     continue;
 
                 QString color = parts[1];
                 QString variant = parts[2];
                 QString timeControl = parts[3];
+                QString startingPosition = parts[4];
 
                 qDebug() << "MATCH RECEIVED";
                 qDebug() << "Color:" << color;
                 qDebug() << "Variant:" << variant;
                 qDebug() << "Time:" << timeControl;
-
-                gamePage->startGame(color);
+                qDebug() << "Starting position:" << startingPosition;
 
                 gamePage->getContext()->setVariant(chessVariants.at(variant));
+
+                gamePage->startGame(color, startingPosition);
+
                 gamePage->getContext()->setTimeControl(parseTimeControl(timeControl));
 
                 stackedWidget->setCurrentWidget(gamePage);
@@ -208,7 +211,7 @@ void MainWindow::createMenuWidgets() {
     timeBox->addItems({ "1+0","1+1","3+0","3+2","5+0","5+2","10","15+10","30" });
 
     variantBox = new QComboBox();
-    variantBox->addItems({ "Classic","Atomic","Fischer Random" });
+    variantBox->addItems({ "Classic","Atomic","Chess960" });
 
     createGameButton = new QPushButton("Create Game");
     joinGameButton = new QPushButton("Join Game");

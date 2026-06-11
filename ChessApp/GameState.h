@@ -22,6 +22,7 @@ public:
 	GameState();
 
 	vector<Square*>& getAllSquares();
+
 	void addSquare(int index, Square* square);
 
 	void addPiece(Piece* piece);

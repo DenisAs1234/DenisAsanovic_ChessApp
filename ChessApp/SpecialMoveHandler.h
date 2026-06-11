@@ -19,6 +19,10 @@ class SpecialMoveHandler {
 	PositionAnalyzer* analyzer;
 	PieceFactory* factory;
 
+	int initialKingFile;
+	int initialQueensideRookFile;
+	int initialKingsideRookFile;
+
 	int castlingRookFrom = -1;
 	int castlingRookTo = -1;
 
@@ -51,11 +55,18 @@ public:
 	void executePromotion(Pawn* promotingPawn, PieceType type, Square* destination);
 	void executePromotionFromNetwork(PieceColor color, PieceType type, Square* destination);
 
+	void setInitialKingFile(int file);
+	void setInitialKingsideRookFile(int file);
+	void setInitialQueensideRookFile(int file);
+	int getInitialKingsideRookFile();
+	int getInitialQueensideRookFile();
+
 	int getCastlingRookFrom();
 	int getCastlingRookTo();
 
-	bool canCastle(King* king, CastlingType castlingType);
-	void checkIfCastlingMove(King* king, Square* destination);
+	bool canCastle(CastlingType castlingType);
+	bool isRookUnobstructed(int currentFile, int destinationFile);
+	Square* checkIfCastlingMove(King* king, Square* clickedSquare);
 	void executeCastling(King* king, Square* destination);
 
 	vector<Piece*> findAdjacentPieces(Square* captureSquare);

@@ -41,7 +41,7 @@ GamePage::GamePage(QWidget* parent)
     layout->addWidget(view);
 }
 
-void GamePage::startGame(QString& playerColor) {
+void GamePage::startGame(QString playerColor, QString orderOfPieces) {
     PieceColor localPlayerColor = playerColor == "White" ? PieceColor::White : PieceColor::Black;
     context->setLocalPlayerColor(localPlayerColor);
     
@@ -51,7 +51,7 @@ void GamePage::startGame(QString& playerColor) {
     board->drawButtons();
     board->drawClocks();
 
-    context->setupStartingPosition();
+    context->setupStartingPosition(orderOfPieces);
     context->startClock();
 }
 
@@ -67,8 +67,6 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
     Square* from = allSquares[fromIndex];
     Square* to = allSquares[toIndex];
 
-    from->getPiece()->moveTo(to);
-
     if (rookFrom != -1) {
         Square* rookStart = allSquares[rookFrom];
         Square* rookEnd = allSquares[rookTo];
@@ -76,6 +74,8 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
         if (rookStart->getPiece())
             rookStart->getPiece()->moveTo(rookEnd);
     }
+
+    from->getPiece()->moveTo(to);
 
     if (promotionPiece != -1) {
         PieceColor color = context->getState()->getTurnColor();
