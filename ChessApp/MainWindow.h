@@ -28,6 +28,7 @@ private:
 
     QTcpSocket* socket;
 
+    QString nickname;
     QLineEdit* nicknameEdit;
     QComboBox* skillBox;
     QComboBox* timeBox;
@@ -38,6 +39,7 @@ private:
     QPushButton* backToMenuButton;
 
     QPushButton* createGameButton;
+    QPushButton* browseGamesButton;
     QPushButton* joinGameButton;
 
     void setupMenuUI();

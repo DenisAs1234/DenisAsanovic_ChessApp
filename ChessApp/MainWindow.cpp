@@ -167,8 +167,10 @@ MainWindow::MainWindow(QWidget* parent)
         });
 
     connect(createGameButton, &QPushButton::clicked, this, [=]() {
+        nickname = nicknameEdit->text();
+
         QString request =
-            nicknameEdit->text() + "|" +
+            nickname + "|" +
             variantBox->currentText() + "|" +
             timeBox->currentText() + "|" +
             skillBox->currentText();
@@ -178,7 +180,8 @@ MainWindow::MainWindow(QWidget* parent)
         stackedWidget->setCurrentWidget(lobbyPage);
         });
 
-    connect(joinGameButton, &QPushButton::clicked, this, [=]() {
+    connect(browseGamesButton, &QPushButton::clicked, this, [=]() {
+        nickname = nicknameEdit->text();
         stackedWidget->setCurrentWidget(lobbyPage);
         });
 
@@ -214,7 +217,7 @@ void MainWindow::createMenuWidgets() {
     variantBox->addItems({ "Classic","Atomic","Chess960" });
 
     createGameButton = new QPushButton("Create Game");
-    joinGameButton = new QPushButton("Join Game");
+    browseGamesButton = new QPushButton("Browse Games");
 }
 
 void MainWindow::setupMenuStyles()
@@ -296,7 +299,7 @@ void MainWindow::setupMenuStyles()
         "}"
     );
 
-    joinGameButton->setStyleSheet(
+    browseGamesButton->setStyleSheet(
         "QPushButton {"
         "background:#FFD7A3;"
         "border:3px solid #D8831C;"
@@ -324,7 +327,7 @@ void MainWindow::setupMenuLayout() {
     auto buttonLayout = new QHBoxLayout();
 
     buttonLayout->addWidget(createGameButton);
-    buttonLayout->addWidget(joinGameButton);
+    buttonLayout->addWidget(browseGamesButton);
 
     layout->addWidget(title);
 
@@ -431,19 +434,30 @@ void MainWindow::setupLobbyUI() {
     gamesLayout->addStretch();
 }
 
-void MainWindow::addLobbyEntry(QString nickname, QString variant, QString timeControl, QString skill) {
+void MainWindow::addLobbyEntry(QString hostNickname, QString variant, QString timeControl, QString skill) {
     auto row = new QWidget();
     row->setFixedHeight(100);
 
     auto rowLayout = new QHBoxLayout(row);
     rowLayout->setContentsMargins(20, 10, 20, 10);
 
-    auto info = new QLabel(nickname + ", " + variant + ", " + timeControl + ", " + skill);
+    auto info = new QLabel(hostNickname + ", " + variant + ", " + timeControl + ", " + skill);
     info->setFont(QFont("Arial", 18));
 
-    auto joinButton = new QPushButton("Join");
+    joinGameButton = new QPushButton("Join");
 
-    joinButton->setStyleSheet(
+    connect(joinGameButton, &QPushButton::clicked, this, [=]() {
+
+        QString request =
+            this->nickname + "|" +
+            variant + "|" +
+            timeControl + "|" +
+            skill;
+
+        socket->write(request.toUtf8());
+        });
+
+    joinGameButton->setStyleSheet(
         "QPushButton {"
         "background:#B9F6B3;"
         "border:2px solid #2E9B2E;"
@@ -459,7 +473,7 @@ void MainWindow::addLobbyEntry(QString nickname, QString variant, QString timeCo
 
     rowLayout->addWidget(info);
     rowLayout->addStretch();
-    rowLayout->addWidget(joinButton);
+    rowLayout->addWidget(joinGameButton);
 
     auto separator = new QFrame();
     separator->setFixedHeight(2);

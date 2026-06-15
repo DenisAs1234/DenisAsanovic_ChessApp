@@ -6,6 +6,7 @@
 #include "PlayerRequest.h"
 #include <QRandomGenerator>
 #include "Chess960Generator.h"
+#include "GameSession.h"
 
 auto isCompatible = [](const PlayerRequest& a, const PlayerRequest& b) {
     return a.variant == b.variant &&
@@ -47,6 +48,23 @@ auto removeFromWaitingPlayers =
     }
 };
 
+auto findSession =
+[](QTcpSocket* socket,
+    QVector<GameSession>& activeGames)
+-> GameSession*
+{
+    for (auto& game : activeGames) {
+
+        if (game.white == socket)
+            return &game;
+
+        if (game.black == socket)
+            return &game;
+    }
+
+    return nullptr;
+};
+
 int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
@@ -64,6 +82,7 @@ int main(int argc, char* argv[])
 
     QVector<PlayerRequest> waitingPlayers;
     QVector<QTcpSocket*> connectedClients;
+    QVector<GameSession> activeGames;
 
     QObject::connect(&server, &QTcpServer::newConnection,
         [&]()
@@ -81,7 +100,8 @@ int main(int argc, char* argv[])
                     sendLobbyUpdate(waitingPlayers, connectedClients);
                 });
 
-            QObject::connect(client, &QTcpSocket::readyRead, [client, &waitingPlayers, &connectedClients]()
+            QObject::connect(client, &QTcpSocket::readyRead, 
+                [client, &waitingPlayers, &connectedClients, &activeGames]()
             {
                 QString data = client->readAll();
                 qDebug() << "Received:" << data;
@@ -90,12 +110,19 @@ int main(int argc, char* argv[])
                     data.startsWith("DRAW_OFFER|") ||
                     data.startsWith("DRAW_ACCEPTED") ||
                     data.startsWith("RESIGN|")) {
-                    qDebug() << "Broadcasting:" << data;
 
-                    for (QTcpSocket* other : connectedClients) {
-                        if (other != client)
-                            other->write(data.toUtf8());
-                    }
+                    GameSession* session = findSession(client, activeGames);
+
+                    if (!session)
+                        return;
+
+                    QTcpSocket* opponent = (session->white == client)
+                        ? session->black
+                        : session->white;
+
+                    if (opponent)
+                        opponent->write(data.toUtf8());
+
                     return;
                 }
 
@@ -132,6 +159,24 @@ int main(int argc, char* argv[])
                             auto chess960Generator = new Chess960Generator();
                             startingPosition = chess960Generator->generateStartingPosition();
                         }
+
+                        GameSession session;
+
+                        session.white =
+                            (requestColor == "White")
+                            ? request.socket
+                            : other.socket;
+
+                        session.black =
+                            (requestColor == "Black")
+                            ? request.socket
+                            : other.socket;
+
+                        session.variant = request.variant;
+                        session.timeControl = request.timeControl;
+                        session.startingPosition = startingPosition;
+
+                        activeGames.push_back(session);
                         
                         request.socket->write(
                             ("MATCH_FOUND|" +

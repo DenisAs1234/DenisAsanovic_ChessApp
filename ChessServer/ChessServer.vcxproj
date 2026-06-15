@@ -93,6 +93,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chess960Generator.cpp" />
+    <ClCompile Include="GameSession.h" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>

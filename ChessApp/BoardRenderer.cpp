@@ -230,8 +230,7 @@ void BoardRenderer::drawButtons() {
 
 void BoardRenderer::showDrawOfferMessage(PieceColor offerer) {
 	int moveCount = context->getState()->getMoveCount();
-	QString message = QString("Move %1: %2 offered a draw.")
-		.arg(QString::number(moveCount))
+	QString message = QString("%1 offered a draw.")
 		.arg(colorStrings.at(offerer));
 
 	drawOfferMsg = new QGraphicsTextItem(message);
