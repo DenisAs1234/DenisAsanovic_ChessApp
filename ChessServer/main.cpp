@@ -35,9 +35,7 @@ auto sendLobbyUpdate =
 
 auto removeFromWaitingPlayers = [](QTcpSocket* client, QVector<PlayerRequest>& waitingPlayers)
 {
-    for (int i = 0;
-        i < waitingPlayers.size();
-        i++)
+    for (int i = 0; i < waitingPlayers.size(); i++)
     {
         if (waitingPlayers[i].socket == client) {
                 waitingPlayers.remove(i);
@@ -196,13 +194,11 @@ int main(int argc, char* argv[])
 
                         GameSession session;
 
-                        session.white =
-                            (requestColor == "White")
+                        session.white = (requestColor == "White")
                             ? request.socket
                             : other.socket;
 
-                        session.black =
-                            (requestColor == "Black")
+                        session.black = (requestColor == "Black")
                             ? request.socket
                             : other.socket;
 

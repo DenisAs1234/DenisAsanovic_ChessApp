@@ -22,7 +22,8 @@ MainWindow::MainWindow(QWidget* parent)
 {
     resize(1550, 800);
 
-    socket = new QTcpSocket(this);
+    network = new NetworkManager(this);
+    network->connectToServer();
 
     stackedWidget = new QStackedWidget(this);
     setCentralWidget(stackedWidget);
@@ -31,7 +32,7 @@ MainWindow::MainWindow(QWidget* parent)
     setupLobbyUI();
 
     gamePage = new GamePage();
-
+    /*
     connect(gamePage->getContext(), &GameContext::movePlayed, this,
         [=](int from, int to, int rookFrom, int rookTo, int promotionPiece) {
             QString msg = "MOVE|" +
@@ -61,7 +62,7 @@ MainWindow::MainWindow(QWidget* parent)
             socket->write(QString("RESIGN|%1\n")
                 .arg(static_cast<int>(loser))
                 .toUtf8());
-        });
+        });*/
 
     stackedWidget->addWidget(menuPage);
     stackedWidget->addWidget(lobbyPage);
@@ -71,11 +72,64 @@ MainWindow::MainWindow(QWidget* parent)
         [=]() {
             stackedWidget->setCurrentWidget(lobbyPage);
         });
-
+     
     stackedWidget->setCurrentWidget(menuPage);
 
-    socket->connectToHost("127.0.0.1", 12345);
+    connect(gamePage->getContext(), &GameContext::movePlayed,
+        network, &NetworkManager::sendMove);
 
+    connect(gamePage->getContext(), &GameContext::drawOffered,
+        network, &NetworkManager::sendDrawOffer);
+
+    connect(gamePage->getContext(), &GameContext::drawAccepted,
+        network, &NetworkManager::sendDrawAccepted);
+
+    connect(gamePage->getContext(), &GameContext::playerResigned,
+        network, &NetworkManager::sendResignation);
+
+    connect(network, &NetworkManager::lobbyCleared,
+        this, &MainWindow::clearLobby);
+
+    connect(network, &NetworkManager::lobbyEntryReceived,
+        this, &MainWindow::addLobbyEntry);
+
+    connect(network, &NetworkManager::matchFound,
+        this, [=]
+        (QString color, QString variant, QString timeControl, QString startingPosition)
+        {
+            gamePage->getContext()->setVariant(chessVariants.at(variant));
+            gamePage->startGame(color, startingPosition);
+            gamePage->getContext()->setTimeControl(parseTimeControl(timeControl));
+            stackedWidget->setCurrentWidget(gamePage);
+        });
+
+    connect(network, &NetworkManager::moveReceived,
+        this, [=]
+        (int from, int to, int rookFrom, int rookTo, int promotionPiece)
+        {
+            gamePage->applyNetworkMove(from, to, rookFrom, rookTo, promotionPiece);
+        });
+
+    connect(network, &NetworkManager::drawOfferReceived,
+        this, [=](PieceColor offerer)
+        {
+            gamePage->getContext()->receiveDrawOffer(offerer);
+        });
+
+    connect(network, &NetworkManager::drawAcceptedReceived,
+        this, [=]()
+        {
+            gamePage->getContext()->receiveDrawAccepted();
+        });
+
+    connect(network, &NetworkManager::resignationReceived,
+        this, [=](PieceColor loser)
+        {
+            gamePage->getContext()->receiveResignation(loser);
+        });
+
+    //socket->connectToHost("127.0.0.1", 12345);
+    /*
     connect(socket, &QTcpSocket::connected, this, [=]() {
         qDebug() << "Connected to ChessServer!";
         });
@@ -169,19 +223,16 @@ MainWindow::MainWindow(QWidget* parent)
             if (parts.size() == 4)
                 addLobbyEntry(parts[0], parts[1], parts[2], parts[3]);
         }
-        });
+        });*/
 
     connect(createGameButton, &QPushButton::clicked, this, [=]() {
         nickname = nicknameEdit->text();
 
-        QString request =
-            "CREATE_GAME|" +
-            nickname + "|" +
-            variantBox->currentText() + "|" +
-            timeBox->currentText() + "|" +
-            skillBox->currentText();
-
-        socket->write(request.toUtf8());
+        network->sendCreateGame(
+            nickname,
+            variantBox->currentText(),
+            timeBox->currentText(),
+            skillBox->currentText());
 
         stackedWidget->setCurrentWidget(lobbyPage);
         });
@@ -453,14 +504,7 @@ void MainWindow::addLobbyEntry(QString hostNickname, QString variant, QString ti
     auto joinGameButton = new QPushButton("Join");
 
     connect(joinGameButton, &QPushButton::clicked, this, [=]() {
-        QString request =
-            "JOIN_GAME|" +
-            this->nickname + "|" +
-            variant + "|" +
-            timeControl + "|" +
-            skill;
-
-        socket->write(request.toUtf8());
+        network->sendJoinGame(nickname, variant, timeControl, skill);
         });
 
     joinGameButton->setStyleSheet(

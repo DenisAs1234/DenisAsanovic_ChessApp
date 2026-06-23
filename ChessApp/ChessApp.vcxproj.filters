@@ -127,6 +127,9 @@
     <ClCompile Include="GamePage.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -210,6 +213,9 @@
     </QtMoc>
     <QtMoc Include="GamePage.h">
       <Filter>Header Files\UI</Filter>
+    </QtMoc>
+    <QtMoc Include="NetworkManager.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

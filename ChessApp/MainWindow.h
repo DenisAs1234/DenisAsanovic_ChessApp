@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include "NetworkManager.h"
 
 class QStackedWidget;
 class QWidget;
@@ -20,6 +21,8 @@ public:
     ~MainWindow();
 
 private:
+    NetworkManager* network;
+
     QStackedWidget* stackedWidget;
 
     QWidget* menuPage;
