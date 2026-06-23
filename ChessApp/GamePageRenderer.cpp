@@ -62,12 +62,12 @@ void GamePageRenderer::drawButtons() {
 		: context->getBlackPlayer();
 
 	GameButton* draw =
-		new GameButton(ButtonAction::OfferDraw, "Offer draw", localPlayer, context, 780, 500);
+		new GameButton(ButtonAction::OfferDraw, "Offer draw", localPlayer, context, 780, 550);
 
 	scene->addItem(draw);
 
 	GameButton* resign =
-		new GameButton(ButtonAction::Resign, "Resign", localPlayer, context, 780, 570);
+		new GameButton(ButtonAction::Resign, "Resign", localPlayer, context, 780, 620);
 
 	scene->addItem(resign);
 
@@ -77,6 +77,89 @@ void GamePageRenderer::drawButtons() {
 	scene->addItem(backToLobbyButton);
 	backToLobbyButton->setVisible(false);
 	backToLobbyButton->setEnabled(false);
+}
+
+void GamePageRenderer::setPlayerNames(QString myName, QString opponentName) {
+	localNickname = new QGraphicsTextItem();
+	opponentNickname = new QGraphicsTextItem();
+
+	qDebug() << "my name: " << myName;
+	qDebug() << "opponent name: " << opponentName;
+
+	localNickname->setPlainText(myName);
+	opponentNickname->setPlainText(opponentName);
+}
+
+void GamePageRenderer::drawNicknames() {
+	QFont nicknameFont("Arial", 20, QFont::Bold);
+
+	localNickname->setFont(nicknameFont);
+	opponentNickname->setFont(nicknameFont);
+
+	localNickname->setDefaultTextColor(Qt::black);
+	opponentNickname->setDefaultTextColor(Qt::black);
+
+	PieceColor localColor = context->getLocalPlayerColor();
+
+	qreal localNicknameY = 480;
+	qreal opponentNicknameY = 200;
+
+	localNickname->setPos(780, localNicknameY);
+	opponentNickname->setPos(780, opponentNicknameY);
+
+	scene->addItem(localNickname);
+	scene->addItem(opponentNickname);
+}
+
+void GamePageRenderer::drawClocks() {
+	QFont clockFont("Arial", 20, QFont::Bold);
+
+	whiteClock = new QGraphicsTextItem("0:00");
+	blackClock = new QGraphicsTextItem("0:00");
+
+	whiteClock->setFont(clockFont);
+	blackClock->setFont(clockFont);
+
+	whiteClock->setDefaultTextColor(Qt::black);
+	blackClock->setDefaultTextColor(Qt::black);
+
+	PieceColor localColor = context->getLocalPlayerColor();
+
+	qreal localClockY = 440;
+	qreal opponentClockY = 240;
+
+	if (localColor == PieceColor::White) {
+		whiteClock->setPos(780, localClockY);
+		blackClock->setPos(780, opponentClockY);
+	}
+	else {
+		blackClock->setPos(780, localClockY);
+		whiteClock->setPos(780, opponentClockY);
+	}
+
+	scene->addItem(whiteClock);
+	scene->addItem(blackClock);
+}
+
+void GamePageRenderer::updateClockDisplay(Player& player) {
+	qint64 ms = player.getRemainingTime();
+	int seconds = ms / 1000;
+
+	QString text = QString("%1:%2")
+		.arg(seconds / 60, 1, 10)
+		.arg(seconds % 60, 2, 10, QChar('0'));
+
+	if (player.getRemainingTime() < 20000) {
+		text += QString(".%1").arg(ms / 100 % 10);
+	}
+
+	lastDisplayedTime = text;
+
+	if (player.getColor() == PieceColor::White) {
+		whiteClock->setPlainText(text);
+		return;
+	}
+	blackClock->setPlainText(text);
 }
 
 void GamePageRenderer::removeFromBoard(Piece* piece) {
@@ -284,55 +367,4 @@ void GamePageRenderer::removeDrawOfferMessage() {
 		delete drawOfferMsg;
 		drawOfferMsg = nullptr;
 	}
-}
-
-void GamePageRenderer::drawClocks() {
-	QFont clockFont("Arial", 20, QFont::Bold);
-
-	whiteClock = new QGraphicsTextItem("0:00");
-	blackClock = new QGraphicsTextItem("0:00");
-
-	whiteClock->setFont(clockFont);
-	blackClock->setFont(clockFont);
-
-	whiteClock->setDefaultTextColor(Qt::black);
-	blackClock->setDefaultTextColor(Qt::black);
-
-	PieceColor localColor = context->getLocalPlayerColor();
-
-	qreal localClockY = 440;
-	qreal opponentClockY = 240;
-
-	if (localColor == PieceColor::White) {
-		whiteClock->setPos(780, localClockY);
-		blackClock->setPos(780, opponentClockY);
-	}
-	else {
-		blackClock->setPos(780, localClockY);
-		whiteClock->setPos(780, opponentClockY);
-	}
-
-	scene->addItem(whiteClock);
-	scene->addItem(blackClock);
-}
-
-void GamePageRenderer::updateClockDisplay(Player& player) {
-	qint64 ms = player.getRemainingTime();
-	int seconds = ms / 1000;
-
-	QString text = QString("%1:%2")
-		.arg(seconds / 60, 1, 10)
-		.arg(seconds % 60, 2, 10, QChar('0'));
-	
-	if (player.getRemainingTime() < 20000) {
-		text += QString(".%1").arg(ms / 100 % 10);
-	}
-
-	lastDisplayedTime = text;
-
-	if (player.getColor() == PieceColor::White) {
-		whiteClock->setPlainText(text);
-		return;
-	}
-	blackClock->setPlainText(text);
 }

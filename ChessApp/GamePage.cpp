@@ -61,6 +61,7 @@ void GamePage::startGame(QString playerColor, QString orderOfPieces) {
 
     gameRenderer->drawBoard(localPlayerColor);
     gameRenderer->drawButtons();
+    gameRenderer->drawNicknames();
     gameRenderer->drawClocks();
 
     context->setupStartingPosition(orderOfPieces);

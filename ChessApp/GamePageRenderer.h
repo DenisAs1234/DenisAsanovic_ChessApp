@@ -21,6 +21,9 @@ class GamePageRenderer : public QGraphicsRectItem {
 	Square* lastMoveFrom = nullptr;
 	Square* lastMoveTo = nullptr;
 
+	QGraphicsTextItem* localNickname;
+	QGraphicsTextItem* opponentNickname;
+
 	QGraphicsTextItem* whiteClock;
 	QGraphicsTextItem* blackClock;
 	QString lastDisplayedTime;
@@ -46,7 +49,10 @@ public:
 	void drawPiece(Piece* piece);
 	void removeFromBoard(Piece* piece);
 
+	void setPlayerNames(QString myName, QString opponentName);
+	void drawNicknames();
 	void drawButtons();
+
 	void showDrawOfferMessage(PieceColor offerer);
 	void removeDrawOfferMessage();
 

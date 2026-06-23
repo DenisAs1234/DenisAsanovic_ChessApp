@@ -91,7 +91,7 @@ void NetworkManager::processMessage(QString msg) {
 
         if (line.startsWith("MATCH_FOUND")) {
             QStringList parts = line.split('|');
-            emit matchFound(parts[1], parts[2], parts[3], parts[4]);
+            emit matchFound(parts[1], parts[2], parts[3], parts[4], parts[5]);
             continue;
         }
 

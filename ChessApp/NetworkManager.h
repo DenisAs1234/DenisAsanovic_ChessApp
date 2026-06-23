@@ -27,7 +27,8 @@ signals:
     void lobbyCleared();
     void lobbyEntryReceived(QString nickname, QString variant, QString timeControl, QString skill);
 
-    void matchFound(QString color, QString variant, QString timeControl, QString startingPosition);
+    void matchFound(QString nickname, QString color, QString variant, 
+        QString timeControl, QString startingPosition);
 
     void moveReceived(int from, int to, int rookFrom, int rookTo, int promotionPiece);
 

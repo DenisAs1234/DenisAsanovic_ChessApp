@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "GamePage.h"
 #include "GameContext.h"
+#include "GamePageRenderer.h"
 
 #include <QStackedWidget>
 #include <QTcpSocket>
@@ -64,11 +65,15 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(network, &NetworkManager::matchFound,
         this, [=]
-        (QString color, QString variant, QString timeControl, QString startingPosition)
+        (QString color, QString variant, QString timeControl, 
+            QString startingPosition, QString opponentNickname)
         {
             gamePage->getContext()->setVariant(chessVariants.at(variant));
+            gamePage->getContext()->getGameRenderer()->setPlayerNames(this->nickname, opponentNickname);
+
             gamePage->startGame(color, startingPosition);
             gamePage->getContext()->setTimeControl(parseTimeControl(timeControl));
+
             stackedWidget->setCurrentWidget(gamePage);
         });
 

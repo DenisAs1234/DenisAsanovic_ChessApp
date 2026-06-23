@@ -141,8 +141,9 @@ int main(int argc, char* argv[])
                 }
 
                 QStringList parts = data.split('|');
+                /*
                 if (parts.size() != 5)
-                    return;
+                    return;*/
 
                 PlayerRequest request;
                 QString command = parts[0];
@@ -213,14 +214,16 @@ int main(int argc, char* argv[])
                                 requestColor + "|" +
                                 request.variant + "|" +
                                 request.timeControl + "|" + 
-                                startingPosition + "\n").toUtf8());
+                                startingPosition + "|" +
+                                other.nickname + "\n").toUtf8());
 
                         other.socket->write(
                             ("MATCH_FOUND|" +
                                 otherColor + "|" +
                                 request.variant + "|" +
                                 request.timeControl + "|" +
-                                startingPosition + "\n").toUtf8());
+                                startingPosition + "|" +
+                                request.nickname + "\n").toUtf8());
 
                         waitingPlayers.remove(i);
                         waitingPlayers.pop_back();
