@@ -4,7 +4,7 @@
 #include "GameContext.h"
 #include "GameState.h"
 #include "SpecialMoveHandler.h"
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "GameEndChecker.h"
 #include "enums.h"
 

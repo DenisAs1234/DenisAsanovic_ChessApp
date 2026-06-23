@@ -1,7 +1,7 @@
 #include "GamePage.h"
 
 #include "GameContext.h"
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "GameState.h"
 #include "PositionAnalyzer.h"
 #include "SpecialMoveHandler.h"
@@ -12,29 +12,41 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QVBoxLayout>
+using namespace std;
 
 GamePage::GamePage(QWidget* parent)
     : QWidget(parent)
 {
-    board = new BoardRenderer(new QGraphicsScene(this));
+    gameRenderer = make_unique<GamePageRenderer>(new QGraphicsScene(this));
+    state = make_unique<GameState>();
+    analyzer = make_unique<PositionAnalyzer>(state.get(), gameRenderer.get());
+    specialMoves = make_unique<SpecialMoveHandler>(state.get(), gameRenderer.get(), analyzer.get());
+    gameEndings = make_unique<GameEndChecker>(state.get(), gameRenderer.get(), analyzer.get());
 
+    context = make_unique<GameContext>(
+        state.get(),                     
+        gameRenderer.get(),
+        analyzer.get(),                       
+        specialMoves.get(),
+        gameEndings.get());
+    /*
     auto state = new GameState();
     auto analyzer = new PositionAnalyzer(state, board);
     auto specialMoves = new SpecialMoveHandler(state, board, analyzer);
     auto gameEndings = new GameEndChecker(state, board, analyzer);
 
     context = new GameContext(state, board, analyzer, specialMoves, gameEndings);
+    */
+    gameRenderer->setContext(context.get());
+    specialMoves->setContext(context.get());
+    gameEndings->setContext(context.get());
 
-    board->setContext(context);
-    specialMoves->setContext(context);
-    gameEndings->setContext(context);
+    factory = make_unique<PieceFactory>(context.get());
 
-    auto factory = new PieceFactory(context);
+    specialMoves->setFactory(factory.get());
+    context->setFactory(factory.get());
 
-    specialMoves->setFactory(factory);
-    context->setFactory(factory);
-
-    view = new QGraphicsView(board->getScene());
+    view = new QGraphicsView(gameRenderer->getScene());
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -45,17 +57,17 @@ void GamePage::startGame(QString playerColor, QString orderOfPieces) {
     PieceColor localPlayerColor = playerColor == "White" ? PieceColor::White : PieceColor::Black;
     context->setLocalPlayerColor(localPlayerColor);
     
-    board->getScene()->clear();
+    gameRenderer->getScene()->clear();
 
-    board->drawBoard(localPlayerColor);
-    board->drawButtons();
-    board->drawClocks();
+    gameRenderer->drawBoard(localPlayerColor);
+    gameRenderer->drawButtons();
+    gameRenderer->drawClocks();
 
     context->setupStartingPosition(orderOfPieces);
     context->startClock();
 }
 
-GameContext* GamePage::getContext() { return context; }
+GameContext* GamePage::getContext() { return context.get(); }
 
 void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int rookTo, int promotionPiece) {
     qDebug() << fromIndex << toIndex;
@@ -87,8 +99,8 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
     context->updateGameStateAfterMove();
     context->clearDrawOffer();
 
-    board->resetHighlightedMove();
-    board->highlightLastMove(from, to);
+    gameRenderer->resetHighlightedMove();
+    gameRenderer->highlightLastMove(from, to);
 
     context->setApplyingNetworkMove(false);
 }

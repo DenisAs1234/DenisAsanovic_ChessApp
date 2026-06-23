@@ -1,6 +1,6 @@
 #include "GameContext.h"
 #include "GameState.h"
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "PositionAnalyzer.h"
 #include "SpecialMoveHandler.h"
 #include "GameEndChecker.h"
@@ -9,12 +9,13 @@
 #include "PieceFactory.h"
 #include <QBrush>
 
-GameContext::GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
+GameContext::GameContext(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer,
 	SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings) :
 	whitePlayer(PieceColor::White, "White"), blackPlayer(PieceColor::Black, "Black"),
-	state(state), board(board), analyzer(analyzer), specialMoves(specialMoves), gameEndings(gameEndings) {
+	state(state), gameRenderer(gameRenderer), analyzer(analyzer), specialMoves(specialMoves), 
+	gameEndings(gameEndings) {
 
-	clockTimer = new QTimer();
+	clockTimer = new QTimer(this);
 	connect(clockTimer, &QTimer::timeout, this, &GameContext::updateClock);
 	elapsedTimer.start();
 };
@@ -34,8 +35,8 @@ void GameContext::setTimeControl(TimeControl time) {
 	whitePlayer.setRemainingTime(time.initial);
 	blackPlayer.setRemainingTime(time.initial);
 
-	board->updateClockDisplay(whitePlayer);
-	board->updateClockDisplay(blackPlayer);
+	gameRenderer->updateClockDisplay(whitePlayer);
+	gameRenderer->updateClockDisplay(blackPlayer);
 }
 
 Player& GameContext::getTurnPlayer() {
@@ -47,7 +48,7 @@ Player& GameContext::getTurnPlayer() {
 Square* GameContext::getSelectedSquare() { return selectedSquare; }
 
 GameState* GameContext::getState() { return state; }
-BoardRenderer* GameContext::getBoard() { return board; }
+GamePageRenderer* GameContext::getGameRenderer() { return gameRenderer; }
 
 PositionAnalyzer* GameContext::getAnalyzer() { return analyzer; }
 SpecialMoveHandler* GameContext::getSpecialMoves() { return specialMoves; }
@@ -80,7 +81,7 @@ void GameContext::setupStartingPosition(QString orderOfPieces) {
 				Square* square = allSquares[(rank - 1) * 8 + file];
 				Piece* piece = factory->createPiece(type, color, square, path);
 
-				board->drawPiece(piece);
+				gameRenderer->drawPiece(piece);
 				square->setPiece(piece);
 
 				if (type == PieceType::King) {
@@ -100,7 +101,7 @@ void GameContext::setupStartingPosition(QString orderOfPieces) {
 			for (file = 0; file < 8; file++) {
 				Square* square = allSquares[(rank - 1) * 8 + file];
 				Piece* piece = new Pawn(color, square, 1, path, this);
-				board->drawPiece(piece);
+				gameRenderer->drawPiece(piece);
 				square->setPiece(piece);
 				state->addPiece(piece);
 			}
@@ -115,7 +116,7 @@ void GameContext::selectSquare(Square* square) {
 	if (selectedSquare) {
 		auto legalMoves = selectedSquare->getPiece()->getLegalMoves();
 		resetSelectedSquare();
-		board->resetColorOfLegalMoves(legalMoves);
+		gameRenderer->resetColorOfLegalMoves(legalMoves);
 	}
 
 	if (square->isOccupied()) {
@@ -125,15 +126,15 @@ void GameContext::selectSquare(Square* square) {
 		piece->findLegalMoves();
 		auto legalMoves = piece->getLegalMoves();
 
-		board->highlightSelected(selectedSquare);
+		gameRenderer->highlightSelected(selectedSquare);
 		for (Square* legalMove : legalMoves) {
-			board->highlightLegalMove(legalMove);
+			gameRenderer->highlightLegalMove(legalMove);
 		}
 	}
 }
 
 void GameContext::resetSelectedSquare() {
-	board->resetColor(selectedSquare);
+	gameRenderer->resetColor(selectedSquare);
 	selectedSquare = nullptr;
 }
 
@@ -147,9 +148,9 @@ void GameContext::updateGameStateAfterMove() {
 }
 
 void GameContext::handleSquareClick(Square* clickedSquare) {
-	if (!board->getBoardActive()) return;
+	if (!gameRenderer->getBoardActive()) return;
 	if (state->getTurnColor() != localPlayerColor) return;
-	if (board->getPromotionMenuActive()) return;
+	if (gameRenderer->getPromotionMenuActive()) return;
 
 	if (!selectedSquare) {
 		if (clickedSquare->isOccupied() && clickedSquare->getPiece()->getColor() != state->getTurnColor()) 
@@ -175,7 +176,7 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 			specialMoves->setPendingPromotionTo(toIndex);
 
 			resetSelectedSquare();
-			board->resetColorOfLegalMoves(legalMoves);
+			gameRenderer->resetColorOfLegalMoves(legalMoves);
 			return;
 		}
 
@@ -184,10 +185,10 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		clearDrawOffer();
 
 		resetSelectedSquare();
-		board->resetColorOfLegalMoves(legalMoves);
+		gameRenderer->resetColorOfLegalMoves(legalMoves);
 
-		board->resetHighlightedMove();
-		board->highlightLastMove(originalSquare, state->getAllSquares()[toIndex]);
+		gameRenderer->resetHighlightedMove();
+		gameRenderer->highlightLastMove(originalSquare, state->getAllSquares()[toIndex]);
 
 		if (!applyingNetworkMove) {
 			emit movePlayed(
@@ -203,13 +204,13 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 		selectedPiece->resetDestination();
 
 		drawOfferActive = false;
-		board->removeDrawOfferMessage();
+		gameRenderer->removeDrawOfferMessage();
 
 		return;
 	}
 	
 	resetSelectedSquare();
-	board->resetColorOfLegalMoves(legalMoves);
+	gameRenderer->resetColorOfLegalMoves(legalMoves);
 
 	if (clickedSquare->isOccupied()) {
 		if (clickedSquare->getPiece()->getColor() != state->getTurnColor()) return;
@@ -218,7 +219,7 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 }
 
 void GameContext::capturePiece(Piece* piece) {
-	board->removeFromBoard(piece);
+	gameRenderer->removeFromBoard(piece);
 	piece->getSquare()->setPiece(nullptr);
 	piece->setSquare(nullptr);
 	state->removePiece(piece);
@@ -230,8 +231,8 @@ void GameContext::finishPromotionMove() {
 	Square* from = state->getAllSquares()[specialMoves->getPendingPromotionFrom()];
 	Square* to = state->getAllSquares()[specialMoves->getPendingPromotionTo()];
 
-	board->resetHighlightedMove();
-	board->highlightLastMove(from, to);
+	gameRenderer->resetHighlightedMove();
+	gameRenderer->highlightLastMove(from, to);
 
 	emit movePlayed(
 		specialMoves->getPendingPromotionFrom(),
@@ -243,13 +244,15 @@ void GameContext::finishPromotionMove() {
 	specialMoves->clearSpecialMoveData();
 }
 
-void GameContext::offerDraw(Player offerer)
-{
+void GameContext::offerDraw(Player offerer) {
+	if (!drawButtonActive || !gameRenderer->getBoardActive()) return;
+
 	if (!drawOfferActive) {
 		drawOfferActive = true;
-		board->showDrawOfferMessage(offerer.getColor());
+		gameRenderer->showDrawOfferMessage(offerer.getColor());
 
 		emit drawOffered(offerer.getColor());
+		drawButtonActive = false;
 		return;
 	}
 
@@ -259,7 +262,7 @@ void GameContext::offerDraw(Player offerer)
 
 void GameContext::receiveDrawOffer(PieceColor offerer) {
 	drawOfferActive = true;
-	board->showDrawOfferMessage(offerer);
+	gameRenderer->showDrawOfferMessage(offerer);
 }
 
 void GameContext::receiveDrawAccepted() {
@@ -268,10 +271,13 @@ void GameContext::receiveDrawAccepted() {
 
 void GameContext::clearDrawOffer() {
 	drawOfferActive = false;
-	board->removeDrawOfferMessage();
+	drawButtonActive = true;
+	gameRenderer->removeDrawOfferMessage();
 }
 
 void GameContext::resign(Player loser) {
+	if (!gameRenderer->getBoardActive()) return;
+
 	PieceColor winner = (loser.getColor() == PieceColor::White)
 		? PieceColor::Black
 		: PieceColor::White;
@@ -288,13 +294,17 @@ void GameContext::receiveResignation(PieceColor loser) {
 	gameEndings->endGame(colorStrings.at(winner) + " wins by resignation");
 }
 
+void GameContext::backToLobby() {
+	emit returnToLobbyRequested();
+}
+
 void GameContext::startClock() {
 	elapsedTimer.restart();
 	clockTimer->start(50);
 }
 
 void GameContext::updateClock() {
-	if (!board->getBoardActive()) return;
+	if (!gameRenderer->getBoardActive()) return;
 	
 	qint64 elapsedMs = elapsedTimer.restart();
 	Player& turnPlayer = getTurnPlayer();
@@ -307,7 +317,7 @@ void GameContext::updateClock() {
 		gameEndings->endGame(colorStrings.at(winner) + " wins by timeout");
 	}
 
-	board->updateClockDisplay(turnPlayer);
+	gameRenderer->updateClockDisplay(turnPlayer);
 }
 
 void GameContext::stopClock() {
@@ -323,7 +333,7 @@ void GameContext::addIncrement() {
 		: blackPlayer;
 
 	playerWhoMoved.setRemainingTime(playerWhoMoved.getRemainingTime() + timeControl.increment);
-	board->updateClockDisplay(playerWhoMoved);
+	gameRenderer->updateClockDisplay(playerWhoMoved);
 }
 
 void GameContext::setApplyingNetworkMove(bool value) { applyingNetworkMove = value; }

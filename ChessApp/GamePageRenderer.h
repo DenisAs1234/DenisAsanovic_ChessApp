@@ -12,8 +12,9 @@ class PromotionOption;
 class Pawn;
 class GameContext;
 class Player;
+class GameButton;
 
-class BoardRenderer : public QGraphicsRectItem {
+class GamePageRenderer : public QGraphicsRectItem {
 	QGraphicsScene* scene;
 	bool boardActive = true;
 
@@ -29,10 +30,14 @@ class BoardRenderer : public QGraphicsRectItem {
 
 	QGraphicsTextItem* drawOfferMsg = nullptr;
 
+	QGraphicsItemGroup* gameOverWindow = nullptr;
+	GameButton* closeButton = nullptr;
+	GameButton* backToLobbyButton = nullptr;
+
 	GameContext* context;
 
 public:
-	BoardRenderer(QGraphicsScene* scene);
+	GamePageRenderer(QGraphicsScene* scene);
 
 	QGraphicsScene* getScene();
 	void setContext(GameContext* context);
@@ -63,5 +68,7 @@ public:
 	void updateClockDisplay(Player& player);
 
 	bool getBoardActive();
+
 	void showGameOverWindow(QString outcome);
+	void removeGameOverWindow();
 };

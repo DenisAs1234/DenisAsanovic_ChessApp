@@ -33,9 +33,7 @@ auto sendLobbyUpdate =
     }
 };
 
-auto removeFromWaitingPlayers =
-[](QTcpSocket* client,
-   QVector<PlayerRequest>& waitingPlayers)
+auto removeFromWaitingPlayers = [](QTcpSocket* client, QVector<PlayerRequest>& waitingPlayers)
 {
     for (int i = 0;
         i < waitingPlayers.size();
@@ -48,10 +46,7 @@ auto removeFromWaitingPlayers =
     }
 };
 
-auto findSession =
-[](QTcpSocket* socket,
-    QVector<GameSession>& activeGames)
--> GameSession*
+auto findSession = [](QTcpSocket* socket, QVector<GameSession>& activeGames) -> GameSession*
 {
     for (auto& game : activeGames) {
 
@@ -64,6 +59,27 @@ auto findSession =
 
     return nullptr;
 };
+
+auto isPlayerInGame = [](QTcpSocket* client, const QVector<GameSession>& activeGames)
+    {
+        for (const auto& game : activeGames) {
+            if (game.white == client ||
+                game.black == client)
+                return true;
+        }
+
+        return false;
+    };
+
+auto isPlayerWaiting = [](QTcpSocket* client, const QVector<PlayerRequest>& waitingPlayers)
+    {
+        for (const auto& player : waitingPlayers) {
+            if (player.socket == client)
+                return true;
+        }
+
+        return false;
+    };
 
 int main(int argc, char* argv[])
 {
@@ -127,18 +143,36 @@ int main(int argc, char* argv[])
                 }
 
                 QStringList parts = data.split('|');
-                if (parts.size() != 4)
+                if (parts.size() != 5)
                     return;
 
                 PlayerRequest request;
-                request.nickname = parts[0];
-                request.variant = parts[1];
-                request.timeControl = parts[2];
-                request.skill = parts[3];
+                QString command = parts[0];
+                request.nickname = parts[1];
+                request.variant = parts[2];
+                request.timeControl = parts[3];
+                request.skill = parts[4];
                 request.socket = client;
 
-                waitingPlayers.push_back(request);
-                sendLobbyUpdate(waitingPlayers, connectedClients);
+                if (command == "CREATE_GAME") {
+                    if (isPlayerInGame(client, activeGames))
+                        return;
+
+                    if (isPlayerWaiting(client, waitingPlayers))
+                        return;
+
+                    waitingPlayers.push_back(request);
+                    sendLobbyUpdate(waitingPlayers, connectedClients);
+                }
+
+                if (command == "JOIN_GAME") {
+                    if (isPlayerInGame(client, activeGames))
+                        return;
+
+                    removeFromWaitingPlayers(client, waitingPlayers);
+                    waitingPlayers.push_back(request);
+                    sendLobbyUpdate(waitingPlayers, connectedClients);
+                }
 
                 for (int i = 0; i < waitingPlayers.size() - 1; i++)
                 {
@@ -199,8 +233,7 @@ int main(int argc, char* argv[])
                         break;
                     }
                 }
-                
-                qDebug() << request.nickname << "added to queue.";
+               
             });
         });
 

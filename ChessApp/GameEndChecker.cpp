@@ -1,14 +1,14 @@
 #include "GameEndChecker.h"
 #include "enums.h"
 #include "GameState.h"
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "PositionAnalyzer.h"
 #include "GameContext.h"
 #include "Square.h"
 #include "Piece.h"
 
-GameEndChecker::GameEndChecker(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) : 
-	state(state), board(board), analyzer(analyzer) {}
+GameEndChecker::GameEndChecker(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer) :
+	state(state), gameRenderer(gameRenderer), analyzer(analyzer) {}
 
 void GameEndChecker::setContext(GameContext* context) { this->context = context; }
 
@@ -106,5 +106,5 @@ bool GameEndChecker::isMaterialInsufficient() {
 
 void GameEndChecker::endGame(QString outcome) {
 	context->stopClock();
-	board->showGameOverWindow(outcome);
+	gameRenderer->showGameOverWindow(outcome);
 }

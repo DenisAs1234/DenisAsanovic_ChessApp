@@ -3,8 +3,8 @@
 #include "Square.h"
 #include "GameState.h"
 
-PositionAnalyzer::PositionAnalyzer(GameState* state, BoardRenderer* board) :
-	state(state), board(board) {
+PositionAnalyzer::PositionAnalyzer(GameState* state, GamePageRenderer* gameRenderer) :
+	state(state), gameRenderer(gameRenderer) {
 }
 
 bool PositionAnalyzer::isMoveLegal(Piece* movingPiece, Square* destination) {

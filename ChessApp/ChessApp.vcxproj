@@ -99,7 +99,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bishop.cpp" />
-    <ClCompile Include="BoardRenderer.cpp" />
+    <ClCompile Include="GamePageRenderer.cpp" />
     <ClCompile Include="GameButton.cpp" />
     <ClCompile Include="GameEndChecker.cpp" />
     <ClCompile Include="GameContext.cpp" />
@@ -146,7 +146,7 @@
     <ClInclude Include="Square.h" />
     <ClInclude Include="pieceTypes.h" />
     <ClInclude Include="SquareIndex.h" />
-    <ClInclude Include="BoardRenderer.h" />
+    <ClInclude Include="GamePageRenderer.h" />
     <ClInclude Include="PositionAnalyzer.h" />
     <ClInclude Include="SpecialMoveHandler.h" />
   </ItemGroup>

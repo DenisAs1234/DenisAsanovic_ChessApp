@@ -1,4 +1,4 @@
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "Piece.h"
 #include "Square.h"
 #include "Pawn.h"
@@ -9,15 +9,15 @@
 #include "GameButton.h"
 #include "Player.h"
 
-BoardRenderer::BoardRenderer(QGraphicsScene* scene) : scene(scene) {};
+GamePageRenderer::GamePageRenderer(QGraphicsScene* scene) : scene(scene) {};
 
-QGraphicsScene* BoardRenderer::getScene() { return scene; }
-void BoardRenderer::setContext(GameContext* context) { this->context = context; }
-vector<QGraphicsRectItem*>& BoardRenderer::getPromotionMenu() { return promotionMenu; }
-bool BoardRenderer::getPromotionMenuActive() { return promotionMenuActive; }
-void BoardRenderer::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
+QGraphicsScene* GamePageRenderer::getScene() { return scene; }
+void GamePageRenderer::setContext(GameContext* context) { this->context = context; }
+vector<QGraphicsRectItem*>& GamePageRenderer::getPromotionMenu() { return promotionMenu; }
+bool GamePageRenderer::getPromotionMenuActive() { return promotionMenuActive; }
+void GamePageRenderer::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
 
-void BoardRenderer::drawBoard(PieceColor localPlayerColor) {
+void GamePageRenderer::drawBoard(PieceColor localPlayerColor) {
 	SquareColor color = SquareColor::dark;
 
 	qreal xPos = 0;
@@ -44,7 +44,7 @@ void BoardRenderer::drawBoard(PieceColor localPlayerColor) {
 	}	
 }
 
-void BoardRenderer::drawPiece(Piece* piece) {
+void GamePageRenderer::drawPiece(Piece* piece) {
 	QPixmap pix(piece->getPath());
 	Square* square = piece->getSquare();
 
@@ -56,23 +56,46 @@ void BoardRenderer::drawPiece(Piece* piece) {
 	scene->addItem(piece);
 }
 
-void BoardRenderer::removeFromBoard(Piece* piece) {
+void GamePageRenderer::drawButtons() {
+	Player localPlayer = context->getLocalPlayerColor() == PieceColor::White
+		? context->getWhitePlayer()
+		: context->getBlackPlayer();
+
+	GameButton* draw =
+		new GameButton(ButtonAction::OfferDraw, "Offer draw", localPlayer, context, 780, 500);
+
+	scene->addItem(draw);
+
+	GameButton* resign =
+		new GameButton(ButtonAction::Resign, "Resign", localPlayer, context, 780, 570);
+
+	scene->addItem(resign);
+
+	backToLobbyButton =
+		new GameButton(ButtonAction::BackToLobby, "Back to lobby", localPlayer, context, -250, 0);
+
+	scene->addItem(backToLobbyButton);
+	backToLobbyButton->setVisible(false);
+	backToLobbyButton->setEnabled(false);
+}
+
+void GamePageRenderer::removeFromBoard(Piece* piece) {
 	scene->removeItem(piece);
 }
 
-void BoardRenderer::resetColor(Square* square) {
+void GamePageRenderer::resetColor(Square* square) {
 	QColor darkSquare(194, 106, 62);
 	QColor lightSquare(247, 183, 151);
 	square->setBrush(QBrush(square->getColor() == SquareColor::dark ? darkSquare : lightSquare));
 }
 
-void BoardRenderer::highlightSelected(Square* square) {
+void GamePageRenderer::highlightSelected(Square* square) {
 	square->setBrush(QBrush(square->getColor() == SquareColor::dark 
 		? QColor(252, 186, 3) 
 		: QColor(250, 209, 5)));
 }
 
-void BoardRenderer::highlightLegalMove(Square* square) {
+void GamePageRenderer::highlightLegalMove(Square* square) {
 	if (!square->isOccupied()) {
 		square->setBrush(QBrush(square->getColor() == SquareColor::dark 
 			? QColor(30, 156, 52) 
@@ -84,7 +107,7 @@ void BoardRenderer::highlightLegalMove(Square* square) {
 		: QColor(66, 139, 255)));
 }
 
-void BoardRenderer::highlightLastMove(Square* startingSquare, Square* destination) {
+void GamePageRenderer::highlightLastMove(Square* startingSquare, Square* destination) {
 	startingSquare->setBrush(
 		QBrush(startingSquare->getColor() == SquareColor::dark
 			? QColor(252, 186, 3)
@@ -99,13 +122,13 @@ void BoardRenderer::highlightLastMove(Square* startingSquare, Square* destinatio
 	lastMoveTo = destination;
 }
 
-void BoardRenderer::resetColorOfLegalMoves(vector<Square*> legalMoves) {
+void GamePageRenderer::resetColorOfLegalMoves(vector<Square*> legalMoves) {
 	for (Square* legalMove : legalMoves) {
 		resetColor(legalMove);
 	}
 }
 
-void BoardRenderer::resetHighlightedMove() {
+void GamePageRenderer::resetHighlightedMove() {
 	if (lastMoveFrom)
 		resetColor(lastMoveFrom);
 
@@ -113,7 +136,7 @@ void BoardRenderer::resetHighlightedMove() {
 		resetColor(lastMoveTo);
 }
 
-void BoardRenderer::drawPromotionMenu(Pawn* promotingPawn, Square* destination) {
+void GamePageRenderer::drawPromotionMenu(Pawn* promotingPawn, Square* destination) {
 	setPromotionMenuActive(true);
 
 	vector<PieceType> promotionTypes = { PieceType::Queen, PieceType::Rook,
@@ -143,7 +166,7 @@ void BoardRenderer::drawPromotionMenu(Pawn* promotingPawn, Square* destination) 
 	}
 }
 
-void BoardRenderer::removePromotionMenu() {
+void GamePageRenderer::removePromotionMenu() {
 	for (auto promotionType : promotionMenu) {
 		scene->removeItem(promotionType);
 		delete promotionType;
@@ -152,10 +175,17 @@ void BoardRenderer::removePromotionMenu() {
 	promotionMenu.clear();
 }
 
-bool BoardRenderer::getBoardActive() { return boardActive; }
+bool GamePageRenderer::getBoardActive() { return boardActive; }
 
-void BoardRenderer::showGameOverWindow(QString outcome) {
+void GamePageRenderer::showGameOverWindow(QString outcome) {
 	boardActive = false;
+
+	backToLobbyButton->setVisible(true);
+	backToLobbyButton->setEnabled(true);
+
+	gameOverWindow = new QGraphicsItemGroup();
+	gameOverWindow->setZValue(10);
+	scene->addItem(gameOverWindow);
 
 	bool isDraw = outcome.contains("Draw", Qt::CaseInsensitive);
 
@@ -164,8 +194,8 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 	int width = 420;
 	int height = 220;
 
-	int x = (scene->width() - width) / 2;
-	int y = (scene->height() - height) / 2;
+	int x = 150;
+	int y = 250;
 
 	// Zaobljeni pravokutnik
 	QPainterPath path;
@@ -176,7 +206,7 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 	window->setPen(QPen(Qt::black, 3));
 	window->setZValue(2);
 
-	scene->addItem(window);
+	gameOverWindow->addToGroup(window);
 
 	// GAME OVER naslov
 	QGraphicsTextItem* title = new QGraphicsTextItem("GAME OVER");
@@ -193,7 +223,7 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 
 	title->setPos(x + (width - titleRect.width()) / 2, y + 40);
 
-	scene->addItem(title);
+	gameOverWindow->addToGroup(title);
 
 	// Ishod partije
 	QGraphicsTextItem* result = new QGraphicsTextItem(outcome);
@@ -209,26 +239,30 @@ void BoardRenderer::showGameOverWindow(QString outcome) {
 	QRectF resultRect = result->boundingRect();
 	result->setPos(x + (width - resultRect.width()) / 2, y + 120);
 
-	scene->addItem(result);
+	gameOverWindow->addToGroup(result);
+
+	// Botun za zatvaranje prozora
+	closeButton = new GameButton(
+		ButtonAction::CloseGameOverWindow, "X", context->getWhitePlayer(), context, x + width - 50, y + 10);
+	closeButton->setZValue(11);
+
+	scene->addItem(closeButton);
 }
 
-void BoardRenderer::drawButtons() {
-	Player localPlayer = context->getLocalPlayerColor() == PieceColor::White
-		? context->getWhitePlayer()
-		: context->getBlackPlayer();
+void GamePageRenderer::removeGameOverWindow() {
+	if (!gameOverWindow)
+		return;
 
-	GameButton* draw = 
-		new GameButton(ButtonAction::OfferDraw, "Offer draw", localPlayer, context, 780, 500);
+	scene->removeItem(gameOverWindow);
+	delete gameOverWindow;
+	gameOverWindow = nullptr;
 
-	scene->addItem(draw);
-
-	GameButton* resign =
-		new GameButton(ButtonAction::Resign, "Resign", localPlayer, context, 780, 570);
-
-	scene->addItem(resign);
+	scene->removeItem(closeButton);
+	delete closeButton;
+	closeButton = nullptr;
 }
 
-void BoardRenderer::showDrawOfferMessage(PieceColor offerer) {
+void GamePageRenderer::showDrawOfferMessage(PieceColor offerer) {
 	int moveCount = context->getState()->getMoveCount();
 	QString message = QString("%1 offered a draw.")
 		.arg(colorStrings.at(offerer));
@@ -244,7 +278,7 @@ void BoardRenderer::showDrawOfferMessage(PieceColor offerer) {
 	scene->addItem(drawOfferMsg);
 }
 
-void BoardRenderer::removeDrawOfferMessage() {
+void GamePageRenderer::removeDrawOfferMessage() {
 	if (drawOfferMsg) {
 		scene->removeItem(drawOfferMsg);
 		delete drawOfferMsg;
@@ -252,7 +286,7 @@ void BoardRenderer::removeDrawOfferMessage() {
 	}
 }
 
-void BoardRenderer::drawClocks() {
+void GamePageRenderer::drawClocks() {
 	QFont clockFont("Arial", 20, QFont::Bold);
 
 	whiteClock = new QGraphicsTextItem("0:00");
@@ -282,7 +316,7 @@ void BoardRenderer::drawClocks() {
 	scene->addItem(blackClock);
 }
 
-void BoardRenderer::updateClockDisplay(Player& player) {
+void GamePageRenderer::updateClockDisplay(Player& player) {
 	qint64 ms = player.getRemainingTime();
 	int seconds = ms / 1000;
 

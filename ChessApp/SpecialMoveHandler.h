@@ -4,7 +4,7 @@
 
 class GameContext;
 class GameState;
-class BoardRenderer;
+class GamePageRenderer;
 class PositionAnalyzer;
 class Pawn;
 class King;
@@ -15,7 +15,7 @@ class PieceFactory;
 class SpecialMoveHandler {
 	GameContext* context;
 	GameState* state;
-	BoardRenderer* board;
+	GamePageRenderer* gameRenderer;
 	PositionAnalyzer* analyzer;
 	PieceFactory* factory;
 
@@ -33,7 +33,7 @@ class SpecialMoveHandler {
 	bool promotionPending = false;
 
 public:
-	SpecialMoveHandler(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer);
+	SpecialMoveHandler(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer);
 
 	void setContext(GameContext* context);
 	void setFactory(PieceFactory* factory);

@@ -67,6 +67,11 @@ MainWindow::MainWindow(QWidget* parent)
     stackedWidget->addWidget(lobbyPage);
     stackedWidget->addWidget(gamePage);
 
+    connect(gamePage->getContext(), &GameContext::returnToLobbyRequested, this,
+        [=]() {
+            stackedWidget->setCurrentWidget(lobbyPage);
+        });
+
     stackedWidget->setCurrentWidget(menuPage);
 
     socket->connectToHost("127.0.0.1", 12345);
@@ -170,6 +175,7 @@ MainWindow::MainWindow(QWidget* parent)
         nickname = nicknameEdit->text();
 
         QString request =
+            "CREATE_GAME|" +
             nickname + "|" +
             variantBox->currentText() + "|" +
             timeBox->currentText() + "|" +
@@ -444,11 +450,11 @@ void MainWindow::addLobbyEntry(QString hostNickname, QString variant, QString ti
     auto info = new QLabel(hostNickname + ", " + variant + ", " + timeControl + ", " + skill);
     info->setFont(QFont("Arial", 18));
 
-    joinGameButton = new QPushButton("Join");
+    auto joinGameButton = new QPushButton("Join");
 
     connect(joinGameButton, &QPushButton::clicked, this, [=]() {
-
         QString request =
+            "JOIN_GAME|" +
             this->nickname + "|" +
             variant + "|" +
             timeControl + "|" +
@@ -474,6 +480,11 @@ void MainWindow::addLobbyEntry(QString hostNickname, QString variant, QString ti
     rowLayout->addWidget(info);
     rowLayout->addStretch();
     rowLayout->addWidget(joinGameButton);
+
+    if (this->nickname == hostNickname) {
+        joinGameButton->setVisible(false);
+        joinGameButton->setEnabled(false);
+    }
 
     auto separator = new QFrame();
     separator->setFixedHeight(2);

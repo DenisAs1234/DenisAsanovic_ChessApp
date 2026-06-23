@@ -1,6 +1,6 @@
 #include "SpecialMoveHandler.h"
 #include "GameState.h"
-#include "BoardRenderer.h"
+#include "GamePageRenderer.h"
 #include "PositionAnalyzer.h"
 #include "GameEndChecker.h"
 #include "Square.h"
@@ -9,8 +9,9 @@
 #include "PieceFactory.h"
 #include "GameContext.h"
 
-SpecialMoveHandler::SpecialMoveHandler(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer) 
-	: state(state), board(board), analyzer(analyzer) {}
+SpecialMoveHandler::SpecialMoveHandler(GameState* state, GamePageRenderer* 
+	, PositionAnalyzer* analyzer) 
+	: state(state), gameRenderer(gameRenderer), analyzer(analyzer) {}
 
 void SpecialMoveHandler::setContext(GameContext* context) { this->context = context; }
 void SpecialMoveHandler::setFactory(PieceFactory* factory) { this->factory = factory; }
@@ -54,7 +55,7 @@ void SpecialMoveHandler::executeEnPassant(Pawn* movingPawn, Square* destination)
 		: getSquareIndex(destination->getRank() + 1, destination->getFile());
 
 	Square* enPassantPos = state->getAllSquares()[index];
-	board->removeFromBoard(enPassantPos->getPiece());
+	gameRenderer->removeFromBoard(enPassantPos->getPiece());
 	enPassantPos->setPiece(nullptr);
 	movingPawn->setEnPassantMove(nullptr);
 }
@@ -114,12 +115,12 @@ bool SpecialMoveHandler::checkIfPromotion(Pawn* promotingPawn, Square* destinati
 	}
 
 	promotionPending = true;
-	board->drawPromotionMenu(promotingPawn, destination);
+	gameRenderer->drawPromotionMenu(promotingPawn, destination);
 	return true;
 }
 
 void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, Square* destination) {
-	board->removeFromBoard(promotingPawn);
+	gameRenderer->removeFromBoard(promotingPawn);
 	state->removePiece(promotingPawn);
 
 	promotionPiece = static_cast<int>(type);
@@ -130,7 +131,7 @@ void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, S
 	QString path = ":/assets/" + colorStrings.at(promotingPawn->getColor()) + pieceStrings.at(type) + ".png";
 	Piece* piece = factory->createPiece(type, promotingPawn->getColor(), destination, path);
 
-	board->drawPiece(piece);
+	gameRenderer->drawPiece(piece);
 
 	promotingPawn->setPromotedTo(piece);
 	destination->setPiece(piece);
@@ -138,13 +139,13 @@ void SpecialMoveHandler::executePromotion(Pawn* promotingPawn, PieceType type, S
 
 void SpecialMoveHandler::executePromotionFromNetwork(PieceColor color, PieceType type, Square* destination)
 {
-	board->removeFromBoard(promotingPawn);
+	gameRenderer->removeFromBoard(promotingPawn);
 	state->removePiece(promotingPawn);
 
 	QString path = ":/assets/" + colorStrings.at(color) + pieceStrings.at(type) + ".png";
 	Piece* piece = factory->createPiece(type, color, destination, path);
 
-	board->drawPiece(piece);
+	gameRenderer->drawPiece(piece);
 	destination->setPiece(piece);
 }
 

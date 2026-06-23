@@ -5,20 +5,20 @@
 
 class GameContext;
 class GameState;
-class BoardRenderer;
+class GamePageRenderer;
 class PositionAnalyzer;
 class Piece;
 class Square;
 
 class GameEndChecker {
 	GameState* state;
-	BoardRenderer* board;
+	GamePageRenderer* gameRenderer;
 	PositionAnalyzer* analyzer;
 	int fiftyMoveRuleCounter = 0;
 	QHash<QString, int> positionCounts;
 	GameContext* context;
 public:
-	GameEndChecker(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer);
+	GameEndChecker(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer);
 
 	void setContext(GameContext* context);
 

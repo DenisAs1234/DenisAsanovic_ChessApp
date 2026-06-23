@@ -3,15 +3,15 @@
 #include "enums.h"
 
 class GameState;
-class BoardRenderer;
+class GamePageRenderer;
 class Square;
 class Piece;
 
 class PositionAnalyzer {
 	GameState* state;
-	BoardRenderer* board;
+	GamePageRenderer* gameRenderer;
 public:
-	PositionAnalyzer(GameState* state, BoardRenderer* board);
+	PositionAnalyzer(GameState* state, GamePageRenderer* gameRenderer);
 	bool isMoveLegal(Piece* movingPiece, Square* destination);
 	bool isKingInCheck(PieceColor turnColor);
 	bool isSquareSafe(Square* square);

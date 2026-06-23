@@ -8,7 +8,7 @@
 #include <QObject>
 
 class GameState;
-class BoardRenderer;
+class GamePageRenderer;
 class PositionAnalyzer;
 class SpecialMoveHandler;
 class GameEndChecker;
@@ -28,13 +28,15 @@ class GameContext : public QObject {
 	Square* selectedSquare;
 
 	GameState* state;
-	BoardRenderer* board;
+	GamePageRenderer* gameRenderer;
 	PositionAnalyzer* analyzer;
 	SpecialMoveHandler* specialMoves;
 	GameEndChecker* gameEndings;
 
 	PieceFactory* factory;
+
 	bool drawOfferActive = false;
+	bool drawButtonActive = true;
 
 	QTimer* clockTimer;
 	QElapsedTimer elapsedTimer;
@@ -42,7 +44,7 @@ class GameContext : public QObject {
 	bool applyingNetworkMove = false;
 
 public:
-	GameContext(GameState* state, BoardRenderer* board, PositionAnalyzer* analyzer,
+	GameContext(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer,
 		SpecialMoveHandler* specialMoves, GameEndChecker* gameEndings);
 
 	void setFactory(PieceFactory* factory);
@@ -58,7 +60,7 @@ public:
 	Player& getTurnPlayer();
 
 	GameState* getState();
-	BoardRenderer* getBoard();
+	GamePageRenderer* getGameRenderer();
 	PositionAnalyzer* getAnalyzer();
 	SpecialMoveHandler* getSpecialMoves();
 	GameEndChecker* getGameEndings();
@@ -83,6 +85,8 @@ public:
 	void resign(Player player);
 	void receiveResignation(PieceColor loser);
 
+	void backToLobby();
+
 	void startClock();
 	void updateClock();
 	void stopClock();
@@ -101,4 +105,5 @@ signals:
 	void drawOffered(PieceColor offerer);
 	void drawAccepted();
 	void playerResigned(PieceColor loser);
+	void returnToLobbyRequested();
 };

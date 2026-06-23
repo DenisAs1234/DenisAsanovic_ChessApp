@@ -40,7 +40,6 @@ private:
 
     QPushButton* createGameButton;
     QPushButton* browseGamesButton;
-    QPushButton* joinGameButton;
 
     void setupMenuUI();
     void createMenuWidgets();
