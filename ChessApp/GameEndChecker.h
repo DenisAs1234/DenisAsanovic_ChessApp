@@ -1,7 +1,7 @@
 #pragma once
 
 #include "enums.h"
-#include<qhash.h>
+#include <qhash.h>
 
 class GameContext;
 class GameState;
@@ -17,13 +17,16 @@ class GameEndChecker {
 	int fiftyMoveRuleCounter = 0;
 	QHash<QString, int> positionCounts;
 	GameContext* context;
+	bool isGameOver = false;
+
 public:
 	GameEndChecker(GameState* state, GamePageRenderer* gameRenderer, PositionAnalyzer* analyzer);
 
 	void setContext(GameContext* context);
+	void setIsGameOver(bool isGameOver);
 
 	bool hasLegalMoves(PieceColor turnColor);
-	void ifGameIsOver();
+	bool ifGameIsOver();
 
 	bool isCheckmate(PieceColor colorWithNoMoves);
 	void handleStalemate();

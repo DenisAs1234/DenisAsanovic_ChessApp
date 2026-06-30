@@ -29,14 +29,7 @@ GamePage::GamePage(QWidget* parent)
         analyzer.get(),                       
         specialMoves.get(),
         gameEndings.get());
-    /*
-    auto state = new GameState();
-    auto analyzer = new PositionAnalyzer(state, board);
-    auto specialMoves = new SpecialMoveHandler(state, board, analyzer);
-    auto gameEndings = new GameEndChecker(state, board, analyzer);
 
-    context = new GameContext(state, board, analyzer, specialMoves, gameEndings);
-    */
     gameRenderer->setContext(context.get());
     specialMoves->setContext(context.get());
     gameEndings->setContext(context.get());

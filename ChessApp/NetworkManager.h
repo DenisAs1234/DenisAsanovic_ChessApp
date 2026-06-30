@@ -23,6 +23,8 @@ public:
 
     void sendResignation(PieceColor loser);
 
+    void sendGameOver();
+
 signals:
     void lobbyCleared();
     void lobbyEntryReceived(QString nickname, QString variant, QString timeControl, QString skill);

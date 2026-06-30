@@ -138,13 +138,13 @@ void GameContext::resetSelectedSquare() {
 	selectedSquare = nullptr;
 }
 
-void GameContext::updateGameStateAfterMove() {
+bool GameContext::updateGameStateAfterMove() {
 	addIncrement();
 	state->switchTurn();
 	state->updateCurrentFen();
 	state->updateMoveCount();
 	gameEndings->updatePositionCounts();
-	gameEndings->ifGameIsOver();
+	return gameEndings->ifGameIsOver();
 }
 
 void GameContext::handleSquareClick(Square* clickedSquare) {
@@ -180,7 +180,7 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 			return;
 		}
 
-		updateGameStateAfterMove();
+		bool isGameOver = updateGameStateAfterMove();
 
 		clearDrawOffer();
 
@@ -199,6 +199,9 @@ void GameContext::handleSquareClick(Square* clickedSquare) {
 				specialMoves->getPromotionPiece());
 
 			specialMoves->clearSpecialMoveData();
+
+			if (isGameOver)
+				emit gameFinished();
 		}
 
 		selectedPiece->resetDestination();
@@ -256,8 +259,9 @@ void GameContext::offerDraw(Player offerer) {
 		return;
 	}
 
-	gameEndings->endGame("Draw by agreement");
 	emit drawAccepted();
+	gameEndings->endGame("Draw by agreement");
+	emit gameFinished();
 }
 
 void GameContext::receiveDrawOffer(PieceColor offerer) {
@@ -284,6 +288,7 @@ void GameContext::resign(Player loser) {
 
 	gameEndings->endGame(colorStrings.at(winner) + " wins by resignation");
 	emit playerResigned(loser.getColor());
+	emit gameFinished();
 }
 
 void GameContext::receiveResignation(PieceColor loser) {

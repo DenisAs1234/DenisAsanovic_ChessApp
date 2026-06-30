@@ -44,6 +44,8 @@ private:
     QPushButton* createGameButton;
     QPushButton* browseGamesButton;
 
+    void connectGamePage();
+
     void setupMenuUI();
     void createMenuWidgets();
     void setupMenuStyles();

@@ -23,6 +23,8 @@ class GamePageRenderer : public QGraphicsRectItem {
 
 	QGraphicsTextItem* localNickname;
 	QGraphicsTextItem* opponentNickname;
+	QString localPlayerName;
+	QString opponentPlayerName;
 
 	QGraphicsTextItem* whiteClock;
 	QGraphicsTextItem* blackClock;

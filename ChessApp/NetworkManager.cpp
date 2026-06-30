@@ -1,6 +1,7 @@
 #include "NetworkManager.h"
 
 #include <QDebug>
+#include <QMessageBox>
 
 NetworkManager::NetworkManager(QObject* parent) : QObject(parent)
 {
@@ -15,12 +16,19 @@ NetworkManager::NetworkManager(QObject* parent) : QObject(parent)
 
 void NetworkManager::connectToServer()
 {
-    socket->connectToHost("127.0.0.1", 12345);
+    socket->connectToHost("192.168.0.108", 12345);
 
     connect(socket, &QTcpSocket::connected,
         this, []()
         {
             qDebug() << "Connected to ChessServer!";
+        });
+    
+    connect(socket, &QTcpSocket::errorOccurred,
+        this,
+        [this](QAbstractSocket::SocketError)
+        {
+            QMessageBox::critical(nullptr, "Socket", socket->errorString());
         });
 }
 
@@ -31,7 +39,7 @@ void NetworkManager::sendCreateGame(QString nickname, QString variant, QString t
         nickname + "|" +
         variant + "|" +
         timeControl + "|" +
-        skill;
+        skill + "\n";
 
     socket->write(request.toUtf8());
 }
@@ -43,7 +51,7 @@ void NetworkManager::sendJoinGame(QString nickname, QString variant, QString tim
         nickname + "|" +
         variant + "|" +
         timeControl + "|" +
-        skill;
+        skill + "\n";
 
     socket->write(request.toUtf8());
 }
@@ -56,7 +64,7 @@ void NetworkManager::sendMove(int from, int to, int rookFrom, int rookTo, int pr
         QString::number(to) + "|" +
         QString::number(rookFrom) + "|" +
         QString::number(rookTo) + "|" +
-        QString::number(promotionPiece);
+        QString::number(promotionPiece) + "\n";
 
     socket->write(msg.toUtf8());
 }
@@ -77,6 +85,10 @@ void NetworkManager::sendResignation(PieceColor loser) {
         QString("RESIGN|%1\n")
         .arg(static_cast<int>(loser))
         .toUtf8());
+}
+
+void NetworkManager::sendGameOver() {
+    socket->write("GAME_OVER\n");
 }
 
 void NetworkManager::processMessage(QString msg) {

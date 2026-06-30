@@ -2,6 +2,7 @@
 #include "GamePage.h"
 #include "GameContext.h"
 #include "GamePageRenderer.h"
+#include "GameEndChecker.h"
 
 #include <QStackedWidget>
 #include <QTcpSocket>
@@ -33,29 +34,13 @@ MainWindow::MainWindow(QWidget* parent)
     setupLobbyUI();
 
     gamePage = new GamePage();
+    connectGamePage();
 
     stackedWidget->addWidget(menuPage);
     stackedWidget->addWidget(lobbyPage);
     stackedWidget->addWidget(gamePage);
 
-    connect(gamePage->getContext(), &GameContext::returnToLobbyRequested, this,
-        [=]() {
-            stackedWidget->setCurrentWidget(lobbyPage);
-        });
-     
     stackedWidget->setCurrentWidget(menuPage);
-
-    connect(gamePage->getContext(), &GameContext::movePlayed,
-        network, &NetworkManager::sendMove);
-
-    connect(gamePage->getContext(), &GameContext::drawOffered,
-        network, &NetworkManager::sendDrawOffer);
-
-    connect(gamePage->getContext(), &GameContext::drawAccepted,
-        network, &NetworkManager::sendDrawAccepted);
-
-    connect(gamePage->getContext(), &GameContext::playerResigned,
-        network, &NetworkManager::sendResignation);
 
     connect(network, &NetworkManager::lobbyCleared,
         this, &MainWindow::clearLobby);
@@ -68,6 +53,13 @@ MainWindow::MainWindow(QWidget* parent)
         (QString color, QString variant, QString timeControl, 
             QString startingPosition, QString opponentNickname)
         {
+            stackedWidget->removeWidget(gamePage);
+            delete gamePage;
+
+            gamePage = new GamePage();
+            stackedWidget->addWidget(gamePage);
+            connectGamePage();
+
             gamePage->getContext()->setVariant(chessVariants.at(variant));
             gamePage->getContext()->getGameRenderer()->setPlayerNames(this->nickname, opponentNickname);
 
@@ -128,6 +120,28 @@ MainWindow::~MainWindow()
 {
 }
 
+void MainWindow::connectGamePage() {
+    connect(gamePage->getContext(), &GameContext::movePlayed,
+        network, &NetworkManager::sendMove);
+
+    connect(gamePage->getContext(), &GameContext::drawOffered,
+        network, &NetworkManager::sendDrawOffer);
+
+    connect(gamePage->getContext(), &GameContext::drawAccepted,
+        network, &NetworkManager::sendDrawAccepted);
+
+    connect(gamePage->getContext(), &GameContext::playerResigned,
+        network, &NetworkManager::sendResignation);
+
+    connect(gamePage->getContext(), &GameContext::gameFinished,
+        network, &NetworkManager::sendGameOver);
+
+    connect(gamePage->getContext(), &GameContext::returnToLobbyRequested,
+        this, [this]()
+        {
+            stackedWidget->setCurrentWidget(lobbyPage);
+        });
+}
 
 void MainWindow::setupMenuUI() {
     menuPage = new QWidget();
@@ -148,10 +162,10 @@ void MainWindow::createMenuWidgets() {
     timeBox->addItems({ "1+0","1+1","3+0","3+2","5+0","5+2","10","15+10","30" });
 
     variantBox = new QComboBox();
-    variantBox->addItems({ "Classic","Atomic","Chess960" });
+    variantBox->addItems({ "Classic", "Atomic", "Chess960" });
 
-    createGameButton = new QPushButton("Create Game");
-    browseGamesButton = new QPushButton("Browse Games");
+    createGameButton = new QPushButton("Create game");
+    browseGamesButton = new QPushButton("Browse games");
 }
 
 void MainWindow::setupMenuStyles()
@@ -268,10 +282,10 @@ void MainWindow::setupMenuLayout() {
     layout->addWidget(new QLabel("Nickname"));
     layout->addWidget(nicknameEdit);
 
-    layout->addWidget(new QLabel("Skill Level"));
+    layout->addWidget(new QLabel("Skill level"));
     layout->addWidget(skillBox);
 
-    layout->addWidget(new QLabel("Time Control"));
+    layout->addWidget(new QLabel("Time control"));
     layout->addWidget(timeBox);
 
     layout->addWidget(new QLabel("Variant"));
@@ -315,7 +329,7 @@ void MainWindow::setupLobbyUI() {
 
     frameLayout->addWidget(scrollArea);
 
-    backToMenuButton = new QPushButton("Back to Main Menu");
+    backToMenuButton = new QPushButton("Back to main menu");
     backToMenuButton->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
     outerLayout->addWidget(lobbyFrame, 0, Qt::AlignCenter);

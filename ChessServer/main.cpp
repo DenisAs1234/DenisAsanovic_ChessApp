@@ -79,6 +79,19 @@ auto isPlayerWaiting = [](QTcpSocket* client, const QVector<PlayerRequest>& wait
         return false;
     };
 
+void removeFinishedGame(QTcpSocket* client, QVector<GameSession>& activeGames)
+{
+    for (int i = 0; i < activeGames.size(); ++i)
+    {
+        if (activeGames[i].white == client ||
+            activeGames[i].black == client)
+        {
+            activeGames.removeAt(i);
+            return;
+        }
+    }
+}
+
 int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
@@ -114,126 +127,134 @@ int main(int argc, char* argv[])
                     sendLobbyUpdate(waitingPlayers, connectedClients);
                 });
 
-            QObject::connect(client, &QTcpSocket::readyRead, 
+            QObject::connect(client, &QTcpSocket::readyRead,
                 [client, &waitingPlayers, &connectedClients, &activeGames]()
-            {
-                QString data = client->readAll();
-                qDebug() << "Received:" << data;
-
-                if (data.startsWith("MOVE|") ||
-                    data.startsWith("DRAW_OFFER|") ||
-                    data.startsWith("DRAW_ACCEPTED") ||
-                    data.startsWith("RESIGN|")) {
-
-                    GameSession* session = findSession(client, activeGames);
-
-                    if (!session)
-                        return;
-
-                    QTcpSocket* opponent = (session->white == client)
-                        ? session->black
-                        : session->white;
-
-                    if (opponent)
-                        opponent->write(data.toUtf8());
-
-                    return;
-                }
-
-                QStringList parts = data.split('|');
-                /*
-                if (parts.size() != 5)
-                    return;*/
-
-                PlayerRequest request;
-                QString command = parts[0];
-                request.nickname = parts[1];
-                request.variant = parts[2];
-                request.timeControl = parts[3];
-                request.skill = parts[4];
-                request.socket = client;
-
-                if (command == "CREATE_GAME") {
-                    if (isPlayerInGame(client, activeGames))
-                        return;
-
-                    if (isPlayerWaiting(client, waitingPlayers))
-                        return;
-
-                    waitingPlayers.push_back(request);
-                    sendLobbyUpdate(waitingPlayers, connectedClients);
-                }
-
-                if (command == "JOIN_GAME") {
-                    if (isPlayerInGame(client, activeGames))
-                        return;
-
-                    removeFromWaitingPlayers(client, waitingPlayers);
-                    waitingPlayers.push_back(request);
-                    sendLobbyUpdate(waitingPlayers, connectedClients);
-                }
-
-                for (int i = 0; i < waitingPlayers.size() - 1; i++)
                 {
-                    PlayerRequest& other = waitingPlayers[i];
+                    QString data = client->readAll();
+                    qDebug() << "Received:" << data;
 
-                    if (isCompatible(request, other))
+                    QStringList messages = data.split('\n', Qt::SkipEmptyParts);
+
+                    for (const QString& message : messages)
                     {
-                        qDebug() << "MATCH FOUND:" << request.nickname << "vs" << other.nickname;
+                        if (message.startsWith("MOVE|") ||
+                            message.startsWith("DRAW_OFFER|") ||
+                            message.startsWith("DRAW_ACCEPTED") ||
+                            message.startsWith("RESIGN|"))
+                        {
+                            GameSession* session = findSession(client, activeGames);
 
-                        bool randomColor = QRandomGenerator::global()->bounded(2);
+                            if (!session)
+                                continue;
 
-                        QString requestColor = randomColor ? "White" : "Black";
-                        QString otherColor = randomColor ? "Black" : "White";
+                            QTcpSocket* opponent = (session->white == client)
+                                ? session->black
+                                : session->white;
 
-                        QString startingPosition = "RNBQKBNR";
-                        
-                        if (request.variant == "Chess960") {
-                            auto chess960Generator = new Chess960Generator();
-                            startingPosition = chess960Generator->generateStartingPosition();
+                            if (opponent)
+                                opponent->write((message + "\n").toUtf8());
+
+                            continue;
                         }
 
-                        GameSession session;
+                        if (message.startsWith("GAME_OVER"))
+                        {
+                            removeFinishedGame(client, activeGames);
+                            continue;
+                        }
 
-                        session.white = (requestColor == "White")
-                            ? request.socket
-                            : other.socket;
+                        QStringList parts = message.split('|');
 
-                        session.black = (requestColor == "Black")
-                            ? request.socket
-                            : other.socket;
+                        PlayerRequest request;
 
-                        session.variant = request.variant;
-                        session.timeControl = request.timeControl;
-                        session.startingPosition = startingPosition;
+                        QString command = parts[0];
+                        request.nickname = parts[1];
+                        request.variant = parts[2];
+                        request.timeControl = parts[3];
+                        request.skill = parts[4];
+                        request.socket = client;
 
-                        activeGames.push_back(session);
-                        
-                        request.socket->write(
-                            ("MATCH_FOUND|" +
-                                requestColor + "|" +
-                                request.variant + "|" +
-                                request.timeControl + "|" + 
-                                startingPosition + "|" +
-                                other.nickname + "\n").toUtf8());
+                        if (command == "CREATE_GAME") {
+                            if (isPlayerInGame(client, activeGames))
+                                return;
 
-                        other.socket->write(
-                            ("MATCH_FOUND|" +
-                                otherColor + "|" +
-                                request.variant + "|" +
-                                request.timeControl + "|" +
-                                startingPosition + "|" +
-                                request.nickname + "\n").toUtf8());
+                            if (isPlayerWaiting(client, waitingPlayers))
+                                return;
 
-                        waitingPlayers.remove(i);
-                        waitingPlayers.pop_back();
-                        sendLobbyUpdate(waitingPlayers, connectedClients);
+                            waitingPlayers.push_back(request);
+                            sendLobbyUpdate(waitingPlayers, connectedClients);
+                        }
 
-                        break;
+                        if (command == "JOIN_GAME") {
+                            if (isPlayerInGame(client, activeGames))
+                                return;
+
+                            removeFromWaitingPlayers(client, waitingPlayers);
+                            waitingPlayers.push_back(request);
+                            sendLobbyUpdate(waitingPlayers, connectedClients);
+                        }
+
+                        for (int i = 0; i < waitingPlayers.size() - 1; i++)
+                        {
+                            PlayerRequest& other = waitingPlayers[i];
+
+                            if (isCompatible(request, other))
+                            {
+                                qDebug() << "MATCH FOUND:" << request.nickname << "vs" << other.nickname;
+
+                                bool randomColor = QRandomGenerator::global()->bounded(2);
+
+                                QString requestColor = randomColor ? "White" : "Black";
+                                QString otherColor = randomColor ? "Black" : "White";
+
+                                QString startingPosition = "RNBQKBNR";
+
+                                if (request.variant == "Chess960") {
+                                    Chess960Generator chess960Generator;
+                                    startingPosition = chess960Generator.generateStartingPosition();
+                                }
+
+                                GameSession session;
+
+                                session.white = (requestColor == "White")
+                                    ? request.socket
+                                    : other.socket;
+
+                                session.black = (requestColor == "Black")
+                                    ? request.socket
+                                    : other.socket;
+
+                                session.variant = request.variant;
+                                session.timeControl = request.timeControl;
+                                session.startingPosition = startingPosition;
+
+                                activeGames.push_back(session);
+
+                                request.socket->write(
+                                    ("MATCH_FOUND|" +
+                                        requestColor + "|" +
+                                        request.variant + "|" +
+                                        request.timeControl + "|" +
+                                        startingPosition + "|" +
+                                        other.nickname + "\n").toUtf8());
+
+                                other.socket->write(
+                                    ("MATCH_FOUND|" +
+                                        otherColor + "|" +
+                                        request.variant + "|" +
+                                        request.timeControl + "|" +
+                                        startingPosition + "|" +
+                                        request.nickname + "\n").toUtf8());
+
+                                waitingPlayers.remove(i);
+                                waitingPlayers.pop_back();
+                                sendLobbyUpdate(waitingPlayers, connectedClients);
+
+                                break;
+                            }
+                        }
                     }
-                }
-               
-            });
+                });
         });
 
     return app.exec();

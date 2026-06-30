@@ -9,7 +9,13 @@
 #include "GameButton.h"
 #include "Player.h"
 
-GamePageRenderer::GamePageRenderer(QGraphicsScene* scene) : scene(scene) {};
+GamePageRenderer::GamePageRenderer(QGraphicsScene* scene) : scene(scene) {
+	localNickname = nullptr;
+	opponentNickname = nullptr;
+
+	whiteClock = nullptr;
+	blackClock = nullptr;
+};
 
 QGraphicsScene* GamePageRenderer::getScene() { return scene; }
 void GamePageRenderer::setContext(GameContext* context) { this->context = context; }
@@ -18,6 +24,8 @@ bool GamePageRenderer::getPromotionMenuActive() { return promotionMenuActive; }
 void GamePageRenderer::setPromotionMenuActive(bool isActive) { promotionMenuActive = isActive; }
 
 void GamePageRenderer::drawBoard(PieceColor localPlayerColor) {
+	boardActive = true;
+
 	SquareColor color = SquareColor::dark;
 
 	qreal xPos = 0;
@@ -57,6 +65,10 @@ void GamePageRenderer::drawPiece(Piece* piece) {
 }
 
 void GamePageRenderer::drawButtons() {
+	bool drawOfferActive = false;
+	bool drawButtonActive = true;
+	drawOfferMsg = nullptr;
+
 	Player localPlayer = context->getLocalPlayerColor() == PieceColor::White
 		? context->getWhitePlayer()
 		: context->getBlackPlayer();
@@ -80,18 +92,28 @@ void GamePageRenderer::drawButtons() {
 }
 
 void GamePageRenderer::setPlayerNames(QString myName, QString opponentName) {
-	localNickname = new QGraphicsTextItem();
-	opponentNickname = new QGraphicsTextItem();
-
 	qDebug() << "my name: " << myName;
 	qDebug() << "opponent name: " << opponentName;
 
-	localNickname->setPlainText(myName);
-	opponentNickname->setPlainText(opponentName);
+	localPlayerName = myName;
+	opponentPlayerName = opponentName;
 }
 
 void GamePageRenderer::drawNicknames() {
+	if (!localNickname) {
+		localNickname = new QGraphicsTextItem();
+		scene->addItem(localNickname);
+	}
+
+	if (!opponentNickname) {
+		opponentNickname = new QGraphicsTextItem();
+		scene->addItem(opponentNickname);
+	}
+
 	QFont nicknameFont("Arial", 20, QFont::Bold);
+
+	localNickname->setPlainText(localPlayerName);
+	opponentNickname->setPlainText(opponentPlayerName);
 
 	localNickname->setFont(nicknameFont);
 	opponentNickname->setFont(nicknameFont);
@@ -106,9 +128,6 @@ void GamePageRenderer::drawNicknames() {
 
 	localNickname->setPos(780, localNicknameY);
 	opponentNickname->setPos(780, opponentNicknameY);
-
-	scene->addItem(localNickname);
-	scene->addItem(opponentNickname);
 }
 
 void GamePageRenderer::drawClocks() {

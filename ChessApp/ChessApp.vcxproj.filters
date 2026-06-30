@@ -159,9 +159,6 @@
     <ClInclude Include="enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameEndChecker.h">
-      <Filter>Header Files\Logic</Filter>
-    </ClInclude>
     <ClInclude Include="GameState.h">
       <Filter>Header Files\State</Filter>
     </ClInclude>
@@ -196,6 +193,9 @@
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
     <ClInclude Include="TimeControl.h">
+      <Filter>Header Files\Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="GameEndChecker.h">
       <Filter>Header Files\Logic</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,8 +9,8 @@
 #include "PieceFactory.h"
 #include "GameContext.h"
 
-SpecialMoveHandler::SpecialMoveHandler(GameState* state, GamePageRenderer* 
-	, PositionAnalyzer* analyzer) 
+SpecialMoveHandler::SpecialMoveHandler(GameState* state, GamePageRenderer* gameRenderer, 
+	PositionAnalyzer* analyzer) 
 	: state(state), gameRenderer(gameRenderer), analyzer(analyzer) {}
 
 void SpecialMoveHandler::setContext(GameContext* context) { this->context = context; }
@@ -373,6 +373,8 @@ void SpecialMoveHandler::executeAtomicCapture(Square* captureSquare, Piece* capt
 		}
 
 		if (piece->getType() == PieceType::King) {
+			context->getGameEndings()->setIsGameOver(true);
+
 			context->getGameEndings()->endGame(
 				colorStrings.at(capturingPiece->getColor()) + " wins by exploding the king");
 		}

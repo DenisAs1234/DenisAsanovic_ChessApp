@@ -11,6 +11,7 @@ GameEndChecker::GameEndChecker(GameState* state, GamePageRenderer* gameRenderer,
 	state(state), gameRenderer(gameRenderer), analyzer(analyzer) {}
 
 void GameEndChecker::setContext(GameContext* context) { this->context = context; }
+void GameEndChecker::setIsGameOver(bool isGameOver) { this->isGameOver = isGameOver; }
 
 bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 	for (Square* square : state->getAllSquares()) {
@@ -25,15 +26,18 @@ bool GameEndChecker::hasLegalMoves(PieceColor turnColor) {
 	return false;
 }
 
-void GameEndChecker::ifGameIsOver() {
-	if (is50MoveRuleReached()) return;
-	if (isRepetition()) return;
-	if (isMaterialInsufficient()) return;
+bool GameEndChecker::ifGameIsOver() {
+	if (isGameOver) return true;
+
+	if (is50MoveRuleReached()) return true;
+	if (isRepetition()) return true;
+	if (isMaterialInsufficient()) return true;
 
 	PieceColor turnColor = state->getTurnColor();
-	if (hasLegalMoves(turnColor)) return;
-	if (isCheckmate(turnColor)) return;
+	if (hasLegalMoves(turnColor)) return false;
+	if (isCheckmate(turnColor)) return true;
 	handleStalemate();
+	return true;
 }
 
 bool GameEndChecker::isCheckmate(PieceColor colorWithNoMoves) {

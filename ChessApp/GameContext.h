@@ -74,7 +74,7 @@ public:
 
 	void capturePiece(Piece* piece);
 
-	void updateGameStateAfterMove();
+	bool updateGameStateAfterMove();
 	void finishPromotionMove();
 
 	void offerDraw(Player oferrer);
@@ -105,5 +105,6 @@ signals:
 	void drawOffered(PieceColor offerer);
 	void drawAccepted();
 	void playerResigned(PieceColor loser);
+	void gameFinished();
 	void returnToLobbyRequested();
 };
