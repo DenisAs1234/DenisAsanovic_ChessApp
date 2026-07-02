@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "CastlingData.h"
 
 class GameContext;
 class GameState;
@@ -23,6 +24,7 @@ class SpecialMoveHandler {
 	int initialQueensideRookFile;
 	int initialKingsideRookFile;
 
+	CastlingData castlingData;
 	int castlingRookFrom = -1;
 	int castlingRookTo = -1;
 
@@ -66,8 +68,16 @@ public:
 
 	bool canCastle(CastlingType castlingType);
 	bool isRookUnobstructed(int currentFile, int destinationFile);
+
 	Square* checkIfCastlingMove(King* king, Square* clickedSquare);
-	void executeCastling(King* king, Square* destination);
+	void prepareCastling(King* king, Square* kingDestination, Square* rookStart, Square* rookDestination);
+	void executeCastling();
+	//void executeCastling(King* king, Square* kingDestination);
+	/*void executeCastling(
+		King* king,
+		Square* kingDestination,
+		Square* rookStart,
+		Square* rookDestination);*/
 
 	vector<Piece*> findAdjacentPieces(Square* captureSquare);
 	void executeAtomicCapture(Square* captureSquare, Piece* capturingPiece);

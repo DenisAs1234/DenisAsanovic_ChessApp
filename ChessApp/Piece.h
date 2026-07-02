@@ -40,5 +40,4 @@ public:
 
 	void moveTo(Square* square);
 	virtual void onMove() {};
-	//bool isMoveLegal(Square* square);
 };

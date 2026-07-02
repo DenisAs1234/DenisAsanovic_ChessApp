@@ -78,25 +78,27 @@ void Piece::findMovesInDirections(vector<pair<int, int>> directions) {
 }
 
 void Piece::moveTo(Square* clickedSquare) {
-	square->setPiece(nullptr);
 	auto specialMoves = context->getSpecialMoves();
 	context->getGameEndings()->update50MoveCounter(this, clickedSquare);
-
-	Pawn* pawn = dynamic_cast<Pawn*>(this);
-	bool isPromotion = false;
-	if (pawn) {
-		specialMoves->checkIfEnPassant(pawn, clickedSquare);
-		isPromotion = specialMoves->checkIfPromotion(pawn, clickedSquare);
-	}
 
 	King* king = dynamic_cast<King*>(this);
 	Square* castlingDestination = nullptr;
 	if (king) {
 		castlingDestination = specialMoves->checkIfCastlingMove(king, clickedSquare);
 	}
-	if (castlingDestination) {
+	if (king && castlingDestination) {
 		this->destination = castlingDestination;
+
+		specialMoves->executeCastling();
+
+		specialMoves->clearEnPassants();
+		context->getState()->resetEnPassantSquare();
+
+		onMove();
+		return;
 	}
+
+	square->setPiece(nullptr);
 
 	if (clickedSquare->isOccupied()) {
 		if (context->getVariant() == ChessVariant::Atomic) {
@@ -113,16 +115,21 @@ void Piece::moveTo(Square* clickedSquare) {
 		context->capturePiece(toBeCaptured);
 	}
 
+	Pawn* pawn = dynamic_cast<Pawn*>(this);
+	bool isPromotion = false;
+	if (pawn) {
+		specialMoves->checkIfEnPassant(pawn, clickedSquare);
+		isPromotion = specialMoves->checkIfPromotion(pawn, clickedSquare);
+	}
+
 	if (isPromotion) {
 		clickedSquare->setPiece(pawn->getPromotedTo());
 	}
 
 	else if (this->square) {
-		Square* destination = castlingDestination ? castlingDestination : clickedSquare;
-
-		square = destination;
-		destination->setPiece(this);
-		setPos(destination->getX() + 5, destination->getY() + 7);
+		square = clickedSquare;
+		clickedSquare->setPiece(this);
+		setPos(clickedSquare->getX() + 5, clickedSquare->getY() + 7);
 	}
 
 	specialMoves->clearEnPassants();

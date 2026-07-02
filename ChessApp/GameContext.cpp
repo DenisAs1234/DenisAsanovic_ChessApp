@@ -57,12 +57,16 @@ GameEndChecker* GameContext::getGameEndings() { return gameEndings; }
 void GameContext::setFactory(PieceFactory* factory) { this->factory = factory; }
 
 void GameContext::setupStartingPosition(QString orderOfPieces) {
+	int kingFile = orderOfPieces.indexOf('K');
 	specialMoves->setInitialKingFile(orderOfPieces.indexOf('K'));
+	qDebug() << "initial king file " << orderOfPieces.indexOf('K');
 
 	specialMoves->setInitialQueensideRookFile(orderOfPieces.indexOf('R'));
-	int kingsideRookFile = specialMoves->getInitialKingsideRookFile();
+	qDebug() << "initial queenside rook file " << specialMoves->getInitialQueensideRookFile();
 
-	specialMoves->setInitialKingsideRookFile(orderOfPieces.indexOf('R', kingsideRookFile + 1));
+	specialMoves->setInitialKingsideRookFile(orderOfPieces.indexOf('R', kingFile + 1));
+	qDebug() << "initial kingside rook file " << 
+		specialMoves->getInitialKingsideRookFile();
 
 	int file;
 

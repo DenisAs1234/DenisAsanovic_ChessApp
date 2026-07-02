@@ -208,12 +208,12 @@ int main(int argc, char* argv[])
                                 QString otherColor = randomColor ? "Black" : "White";
 
                                 QString startingPosition = "RNBQKBNR";
-
+                                
                                 if (request.variant == "Chess960") {
                                     Chess960Generator chess960Generator;
                                     startingPosition = chess960Generator.generateStartingPosition();
                                 }
-
+                                
                                 GameSession session;
 
                                 session.white = (requestColor == "White")

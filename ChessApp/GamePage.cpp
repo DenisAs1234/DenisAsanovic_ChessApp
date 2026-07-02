@@ -72,16 +72,15 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
 
     Square* from = allSquares[fromIndex];
     Square* to = allSquares[toIndex];
+    
+    King* king = dynamic_cast<King*>(from->getPiece());
 
-    if (rookFrom != -1) {
-        Square* rookStart = allSquares[rookFrom];
-        Square* rookEnd = allSquares[rookTo];
-
-        if (rookStart->getPiece())
-            rookStart->getPiece()->moveTo(rookEnd);
+    if (rookFrom != -1 && king) {
+        from->getPiece()->moveTo(allSquares[rookFrom]);
     }
-
-    from->getPiece()->moveTo(to);
+    else {
+        from->getPiece()->moveTo(to);
+    }
 
     if (promotionPiece != -1) {
         PieceColor color = context->getState()->getTurnColor();
@@ -91,6 +90,7 @@ void GamePage::applyNetworkMove(int fromIndex, int toIndex, int rookFrom, int ro
     }
 
     context->updateGameStateAfterMove();
+    specialMoves->clearSpecialMoveData();
     context->clearDrawOffer();
 
     gameRenderer->resetHighlightedMove();
