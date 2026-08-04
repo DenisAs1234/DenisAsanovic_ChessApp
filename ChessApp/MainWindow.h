@@ -31,6 +31,9 @@ private:
 
     QTcpSocket* socket;
 
+    QLineEdit* serverIpEdit;
+    QPushButton* connectButton;
+
     QString nickname;
     QLineEdit* nicknameEdit;
     QComboBox* skillBox;
@@ -48,8 +51,10 @@ private:
 
     void setupMenuUI();
     void createMenuWidgets();
+    void addTimeControls();
     void setupMenuStyles();
     void setupMenuLayout();
+
 
     void setupLobbyUI();
     void addLobbyEntry(QString nickname, QString variant, QString timeControl, QString skill);

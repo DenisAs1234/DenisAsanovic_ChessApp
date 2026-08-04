@@ -12,16 +12,22 @@ NetworkManager::NetworkManager(QObject* parent) : QObject(parent)
         {
             processMessage(socket->readAll());
         });
+
+    connect(socket,
+        &QTcpSocket::connected,
+        this,
+        &NetworkManager::connected);
 }
 
-void NetworkManager::connectToServer()
+void NetworkManager::connectToServer(QString ip)
 {
-    socket->connectToHost("192.168.0.108", 12345);
+    socket->connectToHost(ip, 12345);
 
     connect(socket, &QTcpSocket::connected,
         this, []()
         {
             qDebug() << "Connected to ChessServer!";
+            
         });
     
     connect(socket, &QTcpSocket::errorOccurred,

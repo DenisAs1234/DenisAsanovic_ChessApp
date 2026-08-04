@@ -11,7 +11,7 @@ class NetworkManager : public QObject
 public:
     NetworkManager(QObject* parent = nullptr);
 
-    void connectToServer();
+    void connectToServer(QString ip);
 
     void sendCreateGame(QString nickname, QString variant, QString timeControl, QString skill);
     void sendJoinGame(QString nickname, QString variant, QString timeControl, QString skill);
@@ -26,6 +26,7 @@ public:
     void sendGameOver();
 
 signals:
+    void connected();
     void lobbyCleared();
     void lobbyEntryReceived(QString nickname, QString variant, QString timeControl, QString skill);
 

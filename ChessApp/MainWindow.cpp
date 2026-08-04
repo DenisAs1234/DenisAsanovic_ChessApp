@@ -25,7 +25,6 @@ MainWindow::MainWindow(QWidget* parent)
     resize(1550, 800);
 
     network = new NetworkManager(this);
-    network->connectToServer();
 
     stackedWidget = new QStackedWidget(this);
     setCentralWidget(stackedWidget);
@@ -41,6 +40,18 @@ MainWindow::MainWindow(QWidget* parent)
     stackedWidget->addWidget(gamePage);
 
     stackedWidget->setCurrentWidget(menuPage);
+
+    connect(network, &NetworkManager::connected,
+        this, [=]()
+        {
+            connectButton->setText("Connected");
+
+            connectButton->setEnabled(false);
+            serverIpEdit->setEnabled(false);
+
+            createGameButton->setEnabled(true);
+            browseGamesButton->setEnabled(true);
+        });
 
     connect(network, &NetworkManager::lobbyCleared,
         this, &MainWindow::clearLobby);
@@ -94,13 +105,17 @@ MainWindow::MainWindow(QWidget* parent)
             gamePage->getContext()->receiveResignation(loser);
         });
 
+    connect(connectButton, &QPushButton::clicked, this, [=]() {
+            network->connectToServer(serverIpEdit->text());
+        });
+
     connect(createGameButton, &QPushButton::clicked, this, [=]() {
         nickname = nicknameEdit->text();
 
         network->sendCreateGame(
             nickname,
             variantBox->currentText(),
-            timeBox->currentText(),
+            timeBox->currentData().toString(),
             skillBox->currentText());
 
         stackedWidget->setCurrentWidget(lobbyPage);
@@ -152,6 +167,11 @@ void MainWindow::setupMenuUI() {
 }
 
 void MainWindow::createMenuWidgets() {
+    serverIpEdit = new QLineEdit();
+    serverIpEdit->setText("127.0.0.1");
+
+    connectButton = new QPushButton("Connect");
+
     nicknameEdit = new QLineEdit();
     nicknameEdit->setPlaceholderText("Nickname");
 
@@ -159,17 +179,33 @@ void MainWindow::createMenuWidgets() {
     skillBox->addItems({ "Beginner", "Intermediate", "Advanced", "Expert" });
 
     timeBox = new QComboBox();
-    timeBox->addItems({ "1+0","1+1","3+0","3+2","5+0","5+2","10","15+10","30" });
+    addTimeControls();
 
     variantBox = new QComboBox();
     variantBox->addItems({ "Classic", "Atomic", "Chess960" });
 
     createGameButton = new QPushButton("Create game");
     browseGamesButton = new QPushButton("Browse games");
+
+    createGameButton->setEnabled(false);
+    browseGamesButton->setEnabled(false);
+}
+
+void MainWindow::addTimeControls() {
+    timeBox->addItem("1 min", "1+0");
+    timeBox->addItem("1 min, +1 sec per move", "1+1");
+    timeBox->addItem("3 min", "3+0");
+    timeBox->addItem("3 min, +2 sec per move", "3+2");
+    timeBox->addItem("5 min", "5+0");
+    timeBox->addItem("5 min, +2 sec per move", "5+2");
+    timeBox->addItem("10 min", "10");
+    timeBox->addItem("15 min, +10 sec per move", "15+10");
+    timeBox->addItem("30 min", "30");
 }
 
 void MainWindow::setupMenuStyles()
 {
+    serverIpEdit->setFixedWidth(513);
     nicknameEdit->setFixedWidth(513);
     skillBox->setFixedWidth(513);
     timeBox->setFixedWidth(513);
@@ -234,6 +270,19 @@ void MainWindow::setupMenuStyles()
 
     )");
 
+    connectButton->setStyleSheet(
+        "QPushButton {"
+        "background:#A9D4FF;"
+        "border:3px solid #4A90E2;"
+        "border-radius:18px;"
+        "font:24px Arial;"
+        "font-weight:bold;"
+        "}"
+        "QPushButton:hover {"
+        "background:#87C2FF;"
+        "}"
+    );
+
     createGameButton->setStyleSheet(
         "QPushButton {"
         "background:#B9F6B3;"
@@ -278,6 +327,13 @@ void MainWindow::setupMenuLayout() {
     buttonLayout->addWidget(browseGamesButton);
 
     layout->addWidget(title);
+
+    layout->addWidget(new QLabel("Server IP"));
+    layout->addWidget(serverIpEdit);
+
+    layout->addWidget(connectButton);
+
+    layout->addSpacing(15);
 
     layout->addWidget(new QLabel("Nickname"));
     layout->addWidget(nicknameEdit);
